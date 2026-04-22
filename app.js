@@ -45,10 +45,20 @@ const formError = document.getElementById('form-error');
 let lastOrderData = null;
 
 // Storage Logic
+function generateOrderRef() {
+    const chars = '0123456789';
+    let result = '';
+    for (let i = 0; i < 4; i++) {
+        result += chars.charAt(Math.floor(Math.random() * chars.length));
+    }
+    return `AN-${result}`;
+}
+
 function saveOrder(customerData, cartItems, total) {
     const orders = JSON.parse(localStorage.getItem('anilina_orders') || '[]');
     const newOrder = {
         id: Date.now(),
+        ref: generateOrderRef(),
         date: new Date().toLocaleString(),
         customer: customerData,
         items: cartItems,
@@ -262,10 +272,11 @@ paymentForm.addEventListener('submit', (e) => {
 function sendWhatsAppOrder() {
     if (!lastOrderData) return;
     
-    const { customer, items, total } = lastOrderData;
+    const { ref, customer, items, total } = lastOrderData;
     const itemsText = items.map(i => `- ${i.quantity}x ${i.name}`).join('%0A');
     
     const message = `¡Hola Anilina! 👋 Acabo de realizar un pedido:%0A%0A` +
+        `🆔 *Referencia:* ${ref}%0A` +
         `👤 *Cliente:* ${customer.name}%0A` +
         `📞 *Tel:* ${customer.phone}%0A` +
         `📍 *Dirección:* ${customer.address}%0A%0A` +

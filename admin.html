@@ -143,6 +143,7 @@
             <table id="orders-table">
                 <thead>
                     <tr>
+                        <th>Ref</th>
                         <th>Fecha</th>
                         <th>Cliente</th>
                         <th>Contacto</th>
@@ -194,6 +195,7 @@
                 
                 return `
                     <tr class="order-row">
+                        <td><strong>${order.ref || '---'}</strong></td>
                         <td>${order.date}</td>
                         <td><strong>${order.customer.name}</strong><br><small>${order.customer.address}</small></td>
                         <td>${order.customer.phone}<br><small>${order.customer.email}</small></td>
@@ -250,10 +252,10 @@
             const orders = JSON.parse(localStorage.getItem('anilina_orders') || '[]');
             if (orders.length === 0) return;
 
-            let csv = 'Fecha,Nombre,Email,Telefono,Direccion,Productos,Total\n';
+            let csv = 'Referencia,Fecha,Nombre,Email,Telefono,Direccion,Productos,Total,Estado\n';
             orders.forEach(order => {
                 const items = order.items.map(i => `${i.quantity} ${i.name}`).join(' | ');
-                csv += `"${order.date}","${order.customer.name}","${order.customer.email}","${order.customer.phone}","${order.customer.address}","${items}","${order.total}"\n`;
+                csv += `"${order.ref || '---'}","${order.date}","${order.customer.name}","${order.customer.email}","${order.customer.phone}","${order.customer.address}","${items}","${order.total}","${order.status || 'Pendiente'}"\n`;
             });
 
             const blob = new Blob([csv], { type: 'text/csv;charset=utf-8;' });
