@@ -129,32 +129,54 @@
                     </div>
                     
                     <div class="payment-selection-header">
-                        <h3>Método de Pago Único</h3>
-                        <p>Por el momento recibimos transferencias vía QR Bancolombia</p>
+                        <h3>Selecciona tu Método de Pago</h3>
+                        <p>Aceptamos transferencias directas</p>
                     </div>
 
-                    <div id="qr-details" style="text-align: center; margin-bottom: 20px;">
+                    <div class="payment-methods">
+                        <label class="method-option">
+                            <input type="radio" name="payment-method" value="bancolombia" checked onchange="togglePaymentDetails('bancolombia')">
+                            <div class="method-box">
+                                <i class="fas fa-university"></i>
+                                <span>Bancolombia QR</span>
+                            </div>
+                        </label>
+                        <label class="method-option">
+                            <input type="radio" name="payment-method" value="lallave" onchange="togglePaymentDetails('lallave')">
+                            <div class="method-box">
+                                <i class="fas fa-key"></i>
+                                <span>La Llave</span>
+                            </div>
+                        </label>
+                    </div>
+
+                    <!-- Bancolombia Details -->
+                    <div id="qr-details" class="payment-detail-box" style="text-align: center; margin-bottom: 20px;">
                         <div class="qr-container">
                             <img src="imagenes/qr_bancolombia.png" alt="QR Bancolombia" id="qr-image">
                             <a href="imagenes/qr_bancolombia.png" download="QR_Bancolombia_Anilina.png" class="btn-download">
                                 <i class="fas fa-download"></i> Descargar QR para pagar
                             </a>
                         </div>
-                        
-                        <!-- Added Instructions before confirm button -->
                         <div class="success-steps checkout-steps">
-                            <div class="step">
-                                <span class="step-num">1</span>
-                                <p>Descarga el QR y paga en tu App Bancolombia.</p>
-                            </div>
-                            <div class="step">
-                                <span class="step-num">2</span>
-                                <p>Toma una captura de pantalla del comprobante.</p>
-                            </div>
-                            <div class="step">
-                                <span class="step-num">3</span>
-                                <p>Dale a "Confirmar" y envíanos la foto por WhatsApp.</p>
-                            </div>
+                            <div class="step"><span class="step-num">1</span><p>Paga con el QR.</p></div>
+                            <div class="step"><span class="step-num">2</span><p>Toma captura.</p></div>
+                            <div class="step"><span class="step-num">3</span><p>Confirma y envía.</p></div>
+                        </div>
+                    </div>
+
+                    <!-- La Llave Details -->
+                    <div id="lallave-details" class="payment-detail-box" style="text-align: center; margin-bottom: 20px; display: none;">
+                        <div class="lallave-container" style="background: #fdf5f2; padding: 20px; border-radius: 12px; border: 1px solid var(--primary);">
+                            <i class="fas fa-key fa-2x" style="color: var(--primary); margin-bottom: 10px;"></i>
+                            <h4 style="margin: 0 0 10px 0;">Transferencia La Llave</h4>
+                            <p style="font-size: 1.1rem; font-weight: 700; color: var(--text); margin: 5px 0;" id="lallave-id-display">@CMG o 3245334564</p>
+                            <p style="font-size: 0.85rem; color: #777;">Usa este identificador para tu transferencia.</p>
+                        </div>
+                        <div class="success-steps checkout-steps">
+                            <div class="step"><span class="step-num">1</span><p>Transfiere a la llave.</p></div>
+                            <div class="step"><span class="step-num">2</span><p>Toma captura.</p></div>
+                            <div class="step"><span class="step-num">3</span><p>Confirma y envía.</p></div>
                         </div>
                     </div>
                     <div id="form-error" style="color: #ff4d4d; font-size: 0.85rem; text-align: center; margin-bottom: 15px; display: none;"></div>

@@ -493,16 +493,31 @@
                     <p style="color: #666; margin-bottom: 20px;">Actualiza el código QR que se muestra a los clientes durante el checkout.</p>
                     
                     <div class="form-group">
-                        <label>Ruta de la imagen QR</label>
-                        <input type="text" id="setting-qr-path" placeholder="imagenes/qr_bancolombia.png">
-                    </div>
-                    
-                    <div class="qr-preview" id="qr-preview-container">
-                        <p style="font-size: 0.8rem; color: #888; margin-bottom: 10px;">Vista previa actual:</p>
-                        <img src="" id="current-qr-img" style="width: 100%; border-radius: 8px;">
+                        <label>Imagen del QR (Arrastra, pega o selecciona)</label>
+                        <div class="image-upload-zone" id="qr-drop-zone">
+                            <i class="fas fa-qrcode"></i>
+                            <p>Arrastra tu nuevo QR aquí, pégalo o haz clic</p>
+                            <input type="file" id="qr-image-file" accept="image/*" style="display: none;">
+                            <input type="hidden" id="setting-qr-path">
+                            <div class="image-preview-container" id="qr-preview-wrapper" style="display: block;">
+                                <img src="" id="current-qr-img">
+                            </div>
+                        </div>
                     </div>
                     
                     <button class="btn btn-primary" onclick="saveSettings()">Guardar Configuración</button>
+                </div>
+
+                <div class="form-card">
+                    <h2>Detalles de "La Llave"</h2>
+                    <p style="color: #666; margin-bottom: 20px;">Configura el identificador o número para este método de pago.</p>
+                    
+                    <div class="form-group">
+                        <label>Identificador (Ej: @CMG o 3245334564)</label>
+                        <input type="text" id="setting-llave-id" placeholder="@CMG o 3245334564">
+                    </div>
+                    
+                    <button class="btn btn-primary" onclick="saveSettings()">Guardar Detalles</button>
                 </div>
 
                 <div class="form-card" style="border-top: 5px solid var(--danger);">
@@ -671,7 +686,7 @@
 
         dropZone.onclick = () => imageInput.click();
 
-        imageInput.onchange = (e) => handleFiles(e.target.files);
+        imageInput.onchange = (e) => handleFiles(e.target.files, 'product');
 
         dropZone.addEventListener('dragover', (e) => {
             e.preventDefault();
@@ -685,22 +700,27 @@
         dropZone.addEventListener('drop', (e) => {
             e.preventDefault();
             dropZone.classList.remove('dragover');
-            handleFiles(e.dataTransfer.files);
+            handleFiles(e.dataTransfer.files, 'product');
         });
 
         window.addEventListener('paste', (e) => {
-            if (document.getElementById('product-form-container').style.display === 'block') {
-                const items = (e.clipboardData || e.originalEvent.clipboardData).items;
-                for (let index in items) {
-                    const item = items[index];
-                    if (item.kind === 'file') {
-                        handleFiles([item.getAsFile()]);
+            const isProductView = document.getElementById('product-form-container').style.display === 'block';
+            const isSettingsView = document.getElementById('view-settings').classList.contains('active');
+            
+            const items = (e.clipboardData || e.originalEvent.clipboardData).items;
+            for (let index in items) {
+                const item = items[index];
+                if (item.kind === 'file') {
+                    if (isProductView) {
+                        handleFiles([item.getAsFile()], 'product');
+                    } else if (isSettingsView) {
+                        handleFiles([item.getAsFile()], 'qr');
                     }
                 }
             }
         });
 
-        function handleFiles(files) {
+        function handleFiles(files, target) {
             if (files.length === 0) return;
             const file = files[0];
             if (!file.type.startsWith('image/')) {
@@ -712,13 +732,11 @@
             reader.onload = (e) => {
                 const img = new Image();
                 img.onload = () => {
-                    // Create canvas for compression
                     const canvas = document.createElement('canvas');
                     let width = img.width;
                     let height = img.height;
+                    const max_size = target === 'qr' ? 600 : 800; // QR can be smaller
 
-                    // Resize to max 800px width/height while maintaining aspect ratio
-                    const max_size = 800;
                     if (width > height) {
                         if (width > max_size) {
                             height *= max_size / width;
@@ -736,13 +754,39 @@
                     const ctx = canvas.getContext('2d');
                     ctx.drawImage(img, 0, 0, width, height);
 
-                    // Compress to JPEG with 0.7 quality
-                    const compressedBase64 = canvas.toDataURL('image/jpeg', 0.7);
-                    setProductImage(compressedBase64);
+                    const compressedBase64 = canvas.toDataURL('image/jpeg', target === 'qr' ? 0.8 : 0.7);
+                    
+                    if (target === 'product') {
+                        setProductImage(compressedBase64);
+                    } else if (target === 'qr') {
+                        setQRImage(compressedBase64);
+                    }
                 };
                 img.src = e.target.result;
             };
             reader.readAsDataURL(file);
+        }
+
+        // QR Handling Logic
+        const qrDropZone = document.getElementById('qr-drop-zone');
+        const qrImageInput = document.getElementById('qr-image-file');
+        const qrHiddenInput = document.getElementById('setting-qr-path');
+        const qrPreviewImg = document.getElementById('current-qr-img');
+
+        qrDropZone.onclick = () => qrImageInput.click();
+        qrImageInput.onchange = (e) => handleFiles(e.target.files, 'qr');
+
+        qrDropZone.addEventListener('dragover', (e) => { e.preventDefault(); qrDropZone.classList.add('dragover'); });
+        qrDropZone.addEventListener('dragleave', () => { qrDropZone.classList.remove('dragover'); });
+        qrDropZone.addEventListener('drop', (e) => {
+            e.preventDefault();
+            qrDropZone.classList.remove('dragover');
+            handleFiles(e.dataTransfer.files, 'qr');
+        });
+
+        function setQRImage(src) {
+            qrHiddenInput.value = src;
+            qrPreviewImg.src = src;
         }
 
         function setProductImage(src) {
@@ -834,15 +878,22 @@
         // SETTINGS LOGIC
         function renderSettings() {
             const qrPath = localStorage.getItem('anilina_qr_path') || 'imagenes/qr_bancolombia.png';
+            const llaveId = localStorage.getItem('anilina_llave_id') || '@CMG o 3245334564';
+            
             document.getElementById('setting-qr-path').value = qrPath;
             document.getElementById('current-qr-img').src = qrPath;
+            document.getElementById('setting-llave-id').value = llaveId;
         }
 
         function saveSettings() {
             const path = document.getElementById('setting-qr-path').value;
+            const llaveId = document.getElementById('setting-llave-id').value;
+            
             localStorage.setItem('anilina_qr_path', path);
+            localStorage.setItem('anilina_llave_id', llaveId);
+            
             document.getElementById('current-qr-img').src = path;
-            alert('Configuración de QR guardada correctamente. Se aplicará en el checkout de la tienda.');
+            alert('Configuración guardada correctamente.');
         }
 
         function factoryReset() {

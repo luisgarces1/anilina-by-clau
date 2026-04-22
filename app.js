@@ -62,7 +62,7 @@ function generateOrderRef() {
     return `AN-${result}`;
 }
 
-function saveOrder(customerData, cartItems, total) {
+function saveOrder(customerData, cartItems, total, paymentMethod) {
     const orders = JSON.parse(localStorage.getItem('anilina_orders') || '[]');
     const newOrder = {
         id: Date.now(),
@@ -71,6 +71,7 @@ function saveOrder(customerData, cartItems, total) {
         customer: customerData,
         items: cartItems,
         total: total,
+        paymentMethod: paymentMethod || 'Bancolombia',
         status: 'Pendiente' // Default status
     };
     orders.push(newOrder);
@@ -253,6 +254,7 @@ paymentForm.addEventListener('submit', (e) => {
     };
 
     const total = cart.reduce((sum, item) => sum + (item.price * item.quantity), 0);
+    const selectedMethod = document.querySelector('input[name="payment-method"]:checked').value;
 
     // Simulate payment processing
     const submitBtn = paymentForm.querySelector('button[type="submit"]');
@@ -262,7 +264,7 @@ paymentForm.addEventListener('submit', (e) => {
 
     setTimeout(() => {
         // Save order data locally
-        saveOrder(customerData, [...cart], total);
+        saveOrder(customerData, [...cart], total, selectedMethod);
 
         // UI Updates
         checkoutModal.style.display = 'none';
@@ -277,11 +279,25 @@ paymentForm.addEventListener('submit', (e) => {
     }, 1500);
 });
 
+function togglePaymentDetails(method) {
+    const qrBox = document.getElementById('qr-details');
+    const llaveBox = document.getElementById('lallave-details');
+    
+    if (method === 'bancolombia') {
+        qrBox.style.display = 'block';
+        llaveBox.style.display = 'none';
+    } else {
+        qrBox.style.display = 'none';
+        llaveBox.style.display = 'block';
+    }
+}
+
 function sendWhatsAppOrder() {
     if (!lastOrderData) return;
     
-    const { ref, customer, items, total } = lastOrderData;
+    const { ref, customer, items, total, paymentMethod } = lastOrderData;
     const itemsText = items.map(i => `- ${i.quantity}x ${i.name}`).join('%0A');
+    const methodText = paymentMethod === 'lallave' ? 'La Llave' : 'Bancolombia QR';
     
     const message = `¡Hola Anilina! 👋 Acabo de realizar un pedido:%0A%0A` +
         `🆔 *Referencia:* ${ref}%0A` +
@@ -290,7 +306,8 @@ function sendWhatsAppOrder() {
         `📍 *Dirección:* ${customer.address}%0A%0A` +
         `🛍️ *Productos:*%0A${itemsText}%0A%0A` +
         `💰 *Total:* $${total.toLocaleString()}%0A%0A` +
-        `Aquí adjunto mi comprobante de transferencia Bancolombia.`;
+        `💳 *Método de Pago:* ${methodText}%0A%0A` +
+        `Aquí adjunto mi comprobante de transferencia.`;
 
     window.open(`https://wa.me/573044223573?text=${message}`, '_blank');
 }
@@ -342,13 +359,15 @@ function checkAdminPassword() {
 
 function updateSettings() {
     const qrPath = localStorage.getItem('anilina_qr_path') || 'imagenes/qr_bancolombia.png';
+    const llaveId = localStorage.getItem('anilina_llave_id') || '@CMG o 3245334564';
+    
     const qrImg = document.getElementById('qr-image');
     const qrLink = document.querySelector('.btn-download');
+    const llaveDisplay = document.getElementById('lallave-id-display');
     
     if (qrImg) qrImg.src = qrPath;
-    if (qrLink) {
-        qrLink.href = qrPath;
-    }
+    if (qrLink) qrLink.href = qrPath;
+    if (llaveDisplay) llaveDisplay.innerText = llaveId;
 }
 
 // Initialize Admin Keypress
