@@ -1,0 +1,239 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Anilina by Clau Accesorios | Elegancia y Estilo</title>
+    <meta name="description" content="Descubre la colección más exclusiva de accesorios para mujer. Joyería, bolsos y más con envío a todo el país.">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@300;400;600&family=Playfair+Display:ital,wght@0,400;0,700;1,400&family=Dancing+Script:wght@600&display=swap" rel="stylesheet">
+    <link rel="icon" type="image/jpeg" href="imagenes/logo.jpg">
+    <link rel="stylesheet" href="style.css">
+    <script src="https://kit.fontawesome.com/a076d05399.js" crossorigin="anonymous"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+</head>
+<body>
+    <!-- Navigation -->
+    <nav id="navbar">
+        <div class="nav-container">
+            <div class="logo">
+                <img src="imagenes/logo.jpg" alt="Anilina by Clau Accesorios Logo" id="site-logo">
+                <span class="brand-name">Anilina <small>by CLAU Accesorios</small></span>
+            </div>
+            <ul class="nav-links">
+                <li><a href="#home">Inicio</a></li>
+                <li><a href="#promociones">Promociones</a></li>
+                <li><a href="#ultima-coleccion">Última Colección</a></li>
+                <li><a href="#contacto">Contacto</a></li>
+            </ul>
+            <div class="nav-icons">
+                <div class="cart-icon" id="cart-btn">
+                    <i class="fas fa-shopping-bag"></i>
+                    <span id="cart-count">0</span>
+                </div>
+            </div>
+        </div>
+    </nav>
+
+    <!-- Hero Section -->
+    <header id="home" class="hero">
+        <div class="hero-content">
+            <h1 class="fade-in">Elegancia en cada detalle</h1>
+            <p class="fade-in">Descubre nuestra nueva colección de accesorios diseñados para resaltar tu brillo natural.</p>
+            <a href="#productos" class="btn btn-primary fade-in">Ver Colección</a>
+        </div>
+        <div class="hero-overlay"></div>
+    </header>
+
+    <!-- Promotions Section -->
+    <section id="promociones" class="promo-section">
+        <div class="section-title">
+            <span>Ofertas Imperdibles</span>
+            <h2>Promociones Especiales</h2>
+        </div>
+        <div class="products-grid" id="promo-container">
+            <!-- Promo products will be injected by JS -->
+        </div>
+    </section>
+
+    <!-- Latest Collection Section -->
+    <section id="ultima-coleccion" class="latest-section">
+        <div class="section-title">
+            <span>Recién Llegado</span>
+            <h2>Última Colección</h2>
+        </div>
+        <div class="products-grid" id="latest-container">
+            <!-- Latest products will be injected by JS -->
+        </div>
+    </section>
+
+    <!-- General Collection Section (Rest of products) -->
+    <section id="productos" class="products-section">
+        <div class="section-title">
+            <span>Nuestros Favoritos</span>
+            <h2>Colección Completa</h2>
+        </div>
+        <div class="products-grid" id="products-container">
+            <!-- Products will be injected by JS -->
+        </div>
+    </section>
+
+    <!-- WhatsApp Floating Button -->
+    <a href="https://wa.me/573000000000" class="whatsapp-float" target="_blank">
+        <i class="fab fa-whatsapp"></i>
+        <span>¿Necesitas ayuda?</span>
+    </a>
+
+    <!-- Cart Sidebar -->
+    <div id="cart-sidebar" class="cart-sidebar">
+        <div class="cart-header">
+            <h3>Tu Carrito</h3>
+            <button id="close-cart"><i class="fas fa-times"></i></button>
+        </div>
+        <div id="cart-items" class="cart-items">
+            <!-- Cart items will be injected by JS -->
+        </div>
+        <div class="cart-footer">
+            <div class="cart-total">
+                <span>Total:</span>
+                <span id="cart-total-amount">$0.00</span>
+            </div>
+            <button id="checkout-btn" class="btn btn-full">Finalizar Compra</button>
+        </div>
+    </div>
+    <div id="cart-overlay" class="cart-overlay"></div>
+
+    <!-- Checkout Modal -->
+    <div id="checkout-modal" class="modal">
+        <div class="modal-content">
+            <span class="close-modal">&times;</span>
+            <div class="checkout-container">
+                <h2>Finalizar Pedido</h2>
+                <form id="payment-form" novalidate>
+                    <div class="form-group">
+                        <label for="name">Nombre Completo</label>
+                        <input type="text" id="name" required placeholder="Ej. Claudia Pérez">
+                    </div>
+                    <div class="form-group">
+                        <label for="email">Correo Electrónico</label>
+                        <input type="email" id="email" required placeholder="claudia@ejemplo.com">
+                    </div>
+                    <div class="form-group">
+                        <label for="phone">Teléfono / WhatsApp</label>
+                        <input type="tel" id="phone" required placeholder="Ej. 300 123 4567">
+                    </div>
+                    <div class="form-group">
+                        <label for="address">Dirección de Envío</label>
+                        <input type="text" id="address" required placeholder="Calle 123 #45-67">
+                    </div>
+                    
+                    <div class="payment-selection-header">
+                        <h3>Método de Pago Único</h3>
+                        <p>Por el momento recibimos transferencias vía QR Bancolombia</p>
+                    </div>
+
+                    <div id="qr-details" style="text-align: center; margin-bottom: 20px;">
+                        <div class="qr-container">
+                            <img src="imagenes/qr_bancolombia.png" alt="QR Bancolombia" id="qr-image">
+                            <a href="imagenes/qr_bancolombia.png" download="QR_Bancolombia_Anilina.png" class="btn-download">
+                                <i class="fas fa-download"></i> Descargar QR para pagar
+                            </a>
+                        </div>
+                        
+                        <!-- Added Instructions before confirm button -->
+                        <div class="success-steps checkout-steps">
+                            <div class="step">
+                                <span class="step-num">1</span>
+                                <p>Descarga el QR y paga en tu App Bancolombia.</p>
+                            </div>
+                            <div class="step">
+                                <span class="step-num">2</span>
+                                <p>Toma una captura de pantalla del comprobante.</p>
+                            </div>
+                            <div class="step">
+                                <span class="step-num">3</span>
+                                <p>Dale a "Confirmar" y envíanos la foto por WhatsApp.</p>
+                            </div>
+                        </div>
+                    </div>
+                    <div id="form-error" style="color: #ff4d4d; font-size: 0.85rem; text-align: center; margin-bottom: 15px; display: none;"></div>
+                    <button type="submit" class="btn btn-full btn-gold">Confirmar Pedido <span id="final-total"></span></button>
+                </form>
+            </div>
+        </div>
+    </div>
+
+    <!-- Success Modal -->
+    <div id="success-modal" class="modal">
+            <div class="modal-content success-content">
+                <div class="success-header">
+                    <img src="imagenes/logo.jpg" alt="Logo" class="success-logo">
+                    <div class="success-icon">
+                        <i class="fas fa-check-circle"></i>
+                    </div>
+                </div>
+                <h2 class="elegant-text">¡Pedido Recibido!</h2>
+                <p id="success-message">Gracias por tu compra en <span class="brand-cursive">Anilina by Clau</span>. Tus datos han sido registrados exitosamente.</p>
+                <div style="margin: 20px 0; color: #666; font-size: 0.9rem;">
+                    <p>Por favor, envíanos el comprobante de tu pago por WhatsApp para procesar tu envío de inmediato.</p>
+                </div>
+            <button class="btn btn-full btn-gold" onclick="sendWhatsAppOrder()">
+                <i class="fab fa-whatsapp"></i> Enviar Comprobante ahora
+            </button>
+            <button class="btn-text" onclick="closeSuccessModal()">Volver a la tienda</button>
+        </div>
+    </div>
+
+    <!-- Admin Login Modal -->
+    <div id="admin-modal" class="modal">
+        <div class="modal-content admin-login-content">
+            <span class="close-modal" onclick="closeAdminModal()">&times;</span>
+            <h2 class="elegant-text">Acceso Privado</h2>
+            <p>Ingresa la clave de administrador para continuar.</p>
+            <div class="form-group">
+                <input type="password" id="admin-password" placeholder="Clave de 4 dígitos">
+            </div>
+            <div id="admin-error" style="color: #ff4d4d; font-size: 0.8rem; margin-bottom: 15px; display: none;">Clave incorrecta</div>
+            <button class="btn btn-full btn-gold" onclick="checkAdminPassword()">Entrar al Panel</button>
+        </div>
+    </div>
+
+    <!-- Footer -->
+    <footer id="contacto">
+        <div class="footer-content">
+            <div class="footer-info">
+                <h3>Anilina by Clau Accesorios</h3>
+                <p>Brindando elegancia y sofisticación desde 2026.</p>
+                <div class="social-links">
+                    <a href="#"><i class="fab fa-instagram"></i></a>
+                    <a href="#"><i class="fab fa-facebook"></i></a>
+                    <a href="#"><i class="fab fa-tiktok"></i></a>
+                </div>
+            </div>
+            <div class="footer-links">
+                <h4>Enlaces</h4>
+                <ul>
+                    <li><a href="#home">Inicio</a></li>
+                    <li><a href="#productos">Colección</a></li>
+                    <li><a href="#contacto">Contacto</a></li>
+                </ul>
+            </div>
+            <div class="footer-contact">
+                <h4>Contacto</h4>
+                <p><i class="fas fa-phone"></i> +57 300 000 0000</p>
+                <p><i class="fas fa-envelope"></i> ventas@claudiaaccesorios.com</p>
+                <p><i class="fas fa-map-marker-alt"></i> Medellín, Colombia</p>
+            </div>
+        </div>
+        <div class="footer-bottom">
+            <p>&copy; 2026 Anilina by Clau Accesorios. Todos los derechos reservados.</p>
+            <button onclick="goToAdmin()" class="admin-access-btn" title="Admin Access">
+                <i class="fas fa-lock"></i>
+            </button>
+        </div>
+    </footer>
+
+    <script src="app.js"></script>
+</body>
+</html>
