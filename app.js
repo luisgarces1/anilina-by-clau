@@ -1,5 +1,5 @@
-// Product Data
-const products = [
+// Default Product Data (used only if localStorage is empty)
+const initialProducts = [
     { id: 1, name: "Collar Elegancia Astral", price: 125000, image: "imagenes/WhatsApp Image 2026-04-21 at 6.03.00 PM.jpeg", tag: "latest" },
     { id: 2, name: "Pulsera Cuarzo Rosa", price: 85000, image: "imagenes/WhatsApp Image 2026-04-21 at 6.03.01 PM (1).jpeg", tag: "latest" },
     { id: 3, name: "Anillo Dorado Minimal", price: 45000, image: "imagenes/WhatsApp Image 2026-04-21 at 6.03.01 PM (2).jpeg", promo: true, oldPrice: 65000 },
@@ -13,6 +13,14 @@ const products = [
     { id: 11, name: "Broche Vintage Perla", price: 55000, image: "imagenes/WhatsApp Image 2026-04-21 at 6.03.03 PM (2).jpeg" },
     { id: 12, name: "Aretes Sol y Mar", price: 42000, image: "imagenes/WhatsApp Image 2026-04-21 at 6.03.03 PM.jpeg" }
 ];
+
+// Initialize Products from Storage or Defaults
+let products = JSON.parse(localStorage.getItem('anilina_products'));
+if (!products || products.length === 0) {
+    products = initialProducts;
+    localStorage.setItem('anilina_products', JSON.stringify(products));
+}
+
 
 // Scroll Restoration
 if ('scrollRestoration' in history) {
@@ -332,6 +340,17 @@ function checkAdminPassword() {
     }
 }
 
+function updateSettings() {
+    const qrPath = localStorage.getItem('anilina_qr_path') || 'imagenes/qr_bancolombia.png';
+    const qrImg = document.getElementById('qr-image');
+    const qrLink = document.querySelector('.btn-download');
+    
+    if (qrImg) qrImg.src = qrPath;
+    if (qrLink) {
+        qrLink.href = qrPath;
+    }
+}
+
 // Initialize Admin Keypress
 document.addEventListener('DOMContentLoaded', () => {
     window.scrollTo(0, 0); // Always start at the top
@@ -342,6 +361,7 @@ document.addEventListener('DOMContentLoaded', () => {
         });
     }
     
+    updateSettings();
     displayProducts();
     updateCart();
 });

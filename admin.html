@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Panel de Administración | Anilina by Clau Accesorios</title>
+    <title>Admin Dashboard | Anilina by Clau Accesorios</title>
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@300;400;600&family=Playfair+Display:wght@700&display=swap" rel="stylesheet">
@@ -11,265 +11,868 @@
     <style>
         :root {
             --primary: #E5B3A1;
+            --secondary: #d4a391;
             --text: #2D2D2D;
             --bg: #f8f9fa;
+            --white: #ffffff;
+            --danger: #ff4d4d;
+            --success: #25d366;
         }
+
         body {
             font-family: 'Montserrat', sans-serif;
             background-color: var(--bg);
             color: var(--text);
             margin: 0;
-            padding: 40px 20px;
+            padding: 0;
         }
-        .container {
-            max-width: 1000px;
-            margin: 0 auto;
-            background: white;
-            padding: 30px;
-            border-radius: 15px;
-            box-shadow: 0 5px 25px rgba(0,0,0,0.05);
+
+        .admin-layout {
+            display: grid;
+            grid-template-columns: 250px 1fr;
+            min-height: 100vh;
         }
-        h1 {
+
+        /* Sidebar Styles */
+        .sidebar {
+            background: var(--white);
+            border-right: 1px solid #eee;
+            padding: 30px 20px;
+            display: flex;
+            flex-direction: column;
+            gap: 10px;
+        }
+
+        .sidebar-brand {
             font-family: 'Playfair Display', serif;
+            font-size: 1.5rem;
+            margin-bottom: 30px;
             text-align: center;
-            margin-bottom: 40px;
             color: var(--text);
         }
-        .stats {
+
+        .nav-item {
+            padding: 12px 20px;
+            border-radius: 10px;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            font-weight: 600;
+            transition: 0.3s;
+            color: #777;
+        }
+
+        .nav-item:hover {
+            background: #fff5f2;
+            color: var(--primary);
+        }
+
+        .nav-item.active {
+            background: var(--primary);
+            color: white;
+        }
+
+        /* Main Content */
+        .main-content {
+            padding: 40px;
+            max-width: 1200px;
+            margin: 0 auto;
+            width: 100%;
+            box-sizing: border-box;
+        }
+
+        .header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 40px;
+            flex-wrap: wrap;
+            gap: 20px;
+        }
+
+        .view-section {
+            display: none;
+        }
+
+        .view-section.active {
+            display: block;
+            animation: fadeIn 0.3s ease;
+        }
+
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(10px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        /* Cards & Stats */
+        .stats-grid {
             display: grid;
             grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
             gap: 20px;
-            margin-bottom: 40px;
+            margin-bottom: 30px;
         }
+
         .stat-card {
-            background: #fff;
-            padding: 20px;
-            border-radius: 10px;
-            border-left: 5px solid var(--primary);
-            box-shadow: 0 2px 10px rgba(0,0,0,0.02);
+            background: white;
+            padding: 25px;
+            border-radius: 15px;
+            box-shadow: 0 4px 15px rgba(0,0,0,0.02);
+            border-bottom: 4px solid var(--primary);
         }
+
         .stat-card h3 {
             margin: 0;
-            font-size: 0.9rem;
-            color: #777;
-        }
-        .stat-card p {
-            margin: 10px 0 0;
-            font-size: 1.8rem;
-            font-weight: 700;
-        }
-        table {
-            width: 100%;
-            border-collapse: collapse;
-            margin-top: 20px;
-        }
-        th {
-            text-align: left;
-            padding: 15px;
-            background: #fdfdfd;
-            border-bottom: 2px solid #eee;
             font-size: 0.85rem;
             text-transform: uppercase;
             letter-spacing: 1px;
+            color: #888;
         }
+
+        .stat-card p {
+            margin: 10px 0 0;
+            font-size: 2rem;
+            font-weight: 700;
+            color: var(--text);
+        }
+
+        /* Tables */
+        .table-container {
+            background: white;
+            border-radius: 15px;
+            box-shadow: 0 4px 15px rgba(0,0,0,0.02);
+            overflow: hidden;
+            margin-top: 20px;
+            overflow-x: auto;
+        }
+
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            min-width: 600px;
+        }
+
+        th {
+            text-align: left;
+            padding: 18px;
+            background: #fafafa;
+            border-bottom: 2px solid #eee;
+            font-size: 0.85rem;
+            text-transform: uppercase;
+            color: #666;
+        }
+
         td {
-            padding: 15px;
+            padding: 15px 18px;
             border-bottom: 1px solid #eee;
             font-size: 0.9rem;
         }
-        .order-row:hover {
-            background-color: #fffaf9;
+
+        tr:hover {
+            background-color: #fcfcfc;
         }
+
+        /* Badges */
+        .badge {
+            padding: 4px 12px;
+            border-radius: 20px;
+            font-size: 0.75rem;
+            font-weight: 700;
+            text-transform: uppercase;
+        }
+
+        .badge-pending { background: #fff4e5; color: #ff9800; }
+        .badge-paid { background: #e6f9ed; color: #25d366; }
+        .badge-promo { background: #ffebee; color: #f44336; }
+        .badge-new { background: #e3f2fd; color: #2196f3; }
+        .badge-general { background: #f0f0f0; color: #777; }
+
+        /* Forms */
+        .form-card {
+            background: white;
+            padding: 30px;
+            border-radius: 15px;
+            margin-bottom: 30px;
+            box-shadow: 0 4px 15px rgba(0,0,0,0.02);
+        }
+
+        .form-grid {
+            display: grid;
+            grid-template-columns: repeat(2, 1fr);
+            gap: 20px;
+        }
+
+        .form-group {
+            margin-bottom: 20px;
+        }
+
+        .form-group label {
+            display: block;
+            margin-bottom: 8px;
+            font-size: 0.9rem;
+            font-weight: 600;
+        }
+
+        .form-group input, .form-group select, .form-group textarea {
+            width: 100%;
+            padding: 12px;
+            border: 1px solid #ddd;
+            border-radius: 8px;
+            font-family: inherit;
+            box-sizing: border-box;
+            font-size: 0.9rem;
+        }
+
         .btn {
-            padding: 10px 20px;
-            border-radius: 5px;
+            padding: 12px 24px;
+            border-radius: 8px;
             border: none;
             cursor: pointer;
             font-weight: 600;
             transition: 0.3s;
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+            font-size: 0.9rem;
         }
-        .btn-clear {
-            background: #ff4d4d;
-            color: white;
-            margin-bottom: 20px;
-        }
-        .btn-export {
-            background: #25d366;
-            color: white;
-            margin-bottom: 20px;
-            margin-left: 10px;
-        }
-        .empty-state {
+
+        .btn-primary { background: var(--primary); color: white; }
+        .btn-primary:hover { background: var(--secondary); }
+        .btn-danger { background: var(--danger); color: white; }
+        .btn-success { background: var(--success); color: white; }
+        .btn-outline { background: transparent; border: 1px solid #ddd; color: #777; }
+        .btn-outline:hover { background: #f9f9f9; }
+
+        /* QR Preview */
+        .qr-preview {
+            max-width: 200px;
+            margin: 20px 0;
+            border: 1px solid #eee;
+            padding: 10px;
+            border-radius: 10px;
             text-align: center;
-            padding: 50px;
-            color: #999;
         }
-        .badge {
-            padding: 4px 8px;
-            background: #eef;
+
+        .product-img-td img {
+            width: 40px;
+            height: 40px;
+            object-fit: cover;
             border-radius: 4px;
-            font-size: 0.75rem;
-            margin-right: 5px;
+            box-shadow: 0 2px 5px rgba(0,0,0,0.1);
+        }
+
+        /* Image Drop Zone */
+        .image-upload-zone {
+            border: 2px dashed #ddd;
+            border-radius: 12px;
+            padding: 30px;
+            text-align: center;
+            cursor: pointer;
+            transition: 0.3s;
+            background: #fafafa;
+            position: relative;
+            overflow: hidden;
+            min-height: 150px;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            gap: 10px;
+        }
+
+        .image-upload-zone:hover, .image-upload-zone.dragover {
+            border-color: var(--primary);
+            background: #fff5f2;
+        }
+
+        .image-upload-zone i {
+            font-size: 2rem;
+            color: var(--primary);
+        }
+
+        .image-upload-zone p {
+            margin: 0;
+            font-size: 0.9rem;
+            color: #777;
+        }
+
+        .image-preview-container {
+            width: 100%;
+            height: 100%;
+            position: absolute;
+            top: 0;
+            left: 0;
+            background: white;
+            display: none;
+        }
+
+        .image-preview-container img {
+            width: 100%;
+            height: 100%;
+            object-fit: contain;
+        }
+
+        .remove-img-btn {
+            position: absolute;
+            top: 10px;
+            right: 10px;
+            background: rgba(255,255,255,0.9);
+            border: none;
+            border-radius: 50%;
+            width: 30px;
+            height: 30px;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: var(--danger);
+            box-shadow: 0 2px 5px rgba(0,0,0,0.1);
+            z-index: 10;
+        }
+
+        @media (max-width: 768px) {
+            .admin-layout { grid-template-columns: 1fr; }
+            .sidebar { 
+                flex-direction: row; 
+                overflow-x: auto; 
+                padding: 15px;
+                border-right: none;
+                border-bottom: 1px solid #eee;
+            }
+            .sidebar-brand { display: none; }
+            .nav-item { padding: 8px 15px; white-space: nowrap; }
+            .main-content { padding: 20px; }
+            .form-grid { grid-template-columns: 1fr; }
         }
     </style>
 </head>
 <body>
-    <div class="container">
-        <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 30px;">
-            <a href="index.html" style="text-decoration: none; color: #777; font-size: 0.9rem; display: flex; align-items: center; gap: 8px;">
-                <i class="fas fa-arrow-left"></i> Volver a la Tienda
-            </a>
-            <h1 style="margin: 0;">📦 Panel de Compradores</h1>
-            <div style="width: 100px;"></div> <!-- Spacer for centering title -->
-        </div>
-        
-        <div class="stats">
-            <div class="stat-card">
-                <h3>Total de Pedidos</h3>
-                <p id="total-orders">0</p>
+    <div class="admin-layout">
+        <aside class="sidebar">
+            <div class="sidebar-brand">Anilina Admin</div>
+            <div class="nav-item active" onclick="showView('orders', event)">
+                <i class="fas fa-shopping-bag"></i> Pedidos
             </div>
-            <div class="stat-card">
-                <h3>Ventas Totales</h3>
-                <p id="total-sales">$0</p>
+            <div class="nav-item" onclick="showView('products', event)">
+                <i class="fas fa-gem"></i> Productos
             </div>
-        </div>
+            <div class="nav-item" onclick="showView('settings', event)">
+                <i class="fas fa-cog"></i> Configuración
+            </div>
+            <div style="margin-top: auto;" class="sidebar-footer">
+                <a href="index.html" class="nav-item" style="text-decoration: none;">
+                    <i class="fas fa-store"></i> Ver Tienda
+                </a>
+            </div>
+        </aside>
 
-        <div class="actions">
-            <button class="btn btn-clear" onclick="clearOrders()"><i class="fas fa-trash"></i> Borrar Todo</button>
-            <button class="btn btn-export" onclick="exportToCSV()"><i class="fas fa-file-excel"></i> Exportar Lista</button>
-        </div>
+        <main class="main-content">
+            <!-- VIEW: ORDERS -->
+            <div id="view-orders" class="view-section active">
+                <div class="header">
+                    <h1>📦 Gestión de Pedidos</h1>
+                    <div class="actions">
+                        <button class="btn btn-outline" onclick="exportOrders()"><i class="fas fa-file-export"></i> Exportar</button>
+                        <button class="btn btn-danger" onclick="clearOrders()"><i class="fas fa-trash"></i> Limpiar Todo</button>
+                    </div>
+                </div>
 
-        <div style="overflow-x: auto;">
-            <table id="orders-table">
-                <thead>
-                    <tr>
-                        <th>Ref</th>
-                        <th>Fecha</th>
-                        <th>Cliente</th>
-                        <th>Contacto</th>
-                        <th>Productos</th>
-                        <th>Total</th>
-                        <th>Estado</th>
-                        <th>Acción</th>
-                    </tr>
-                </thead>
-                <tbody id="orders-body">
-                    <!-- Orders will be injected here -->
-                </tbody>
-            </table>
-        </div>
-        <div id="empty-msg" class="empty-state" style="display: none;">
-            <i class="fas fa-box-open fa-3x"></i>
-            <p>Aún no hay pedidos registrados.</p>
-        </div>
+                <div class="stats-grid">
+                    <div class="stat-card">
+                        <h3>Total Pedidos</h3>
+                        <p id="stat-total-orders">0</p>
+                    </div>
+                    <div class="stat-card">
+                        <h3>Ventas Brutas</h3>
+                        <p id="stat-total-sales">$0</p>
+                    </div>
+                </div>
+
+                <div class="table-container">
+                    <table id="orders-table">
+                        <thead>
+                            <tr>
+                                <th>Ref</th>
+                                <th>Fecha</th>
+                                <th>Cliente</th>
+                                <th>Total</th>
+                                <th>Estado</th>
+                                <th>Acciones</th>
+                            </tr>
+                        </thead>
+                        <tbody id="orders-body">
+                            <!-- Orders injected here -->
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+
+            <!-- VIEW: PRODUCTS -->
+            <div id="view-products" class="view-section">
+                <div class="header">
+                    <h1>💎 Inventario de Productos</h1>
+                    <button class="btn btn-primary" onclick="toggleProductForm()"><i class="fas fa-plus"></i> Nuevo Producto</button>
+                </div>
+
+                <!-- Product Form (Hidden by default) -->
+                <div id="product-form-container" class="form-card" style="display: none;">
+                    <h2 id="form-title">Agregar Nuevo Producto</h2>
+                    <form id="product-form">
+                        <input type="hidden" id="edit-id">
+                        <div class="form-grid">
+                            <div class="form-group">
+                                <label>Nombre del Producto</label>
+                                <input type="text" id="prod-name" required placeholder="Ej. Collar Elegancia Astral">
+                            </div>
+                            <div class="form-group">
+                                <label>Precio ($)</label>
+                                <input type="number" id="prod-price" required placeholder="Ej. 125000">
+                            </div>
+                            <div class="form-group">
+                                <label>Etiqueta / Estado</label>
+                                <select id="prod-tag">
+                                    <option value="none">General</option>
+                                    <option value="latest">Nueva Colección</option>
+                                    <option value="promo">En Promoción</option>
+                                </select>
+                            </div>
+                            <div class="form-group">
+                                <label>Precio Anterior (Solo para promos)</label>
+                                <input type="number" id="prod-old-price" placeholder="Ej. 150000">
+                            </div>
+                            <div class="form-group" style="grid-column: span 2;">
+                                <label>Imagen del Producto (Arrastra, pega o selecciona)</label>
+                                <div class="image-upload-zone" id="image-drop-zone">
+                                    <i class="fas fa-cloud-upload-alt"></i>
+                                    <p>Arrastra una imagen aquí, pégala (Ctrl+V) o haz clic para seleccionar</p>
+                                    <input type="file" id="prod-image-file" accept="image/*" style="display: none;">
+                                    <input type="hidden" id="prod-image">
+                                    <div class="image-preview-container" id="image-preview-wrapper">
+                                        <button type="button" class="remove-img-btn" onclick="clearProductImage(event)">
+                                            <i class="fas fa-times"></i>
+                                        </button>
+                                        <img src="" id="image-preview-img">
+                                    </div>
+                                </div>
+                                <small style="color: #888;">La imagen se guardará directamente en el navegador.</small>
+                            </div>
+                        </div>
+                        <div style="display: flex; gap: 10px;">
+                            <button type="submit" class="btn btn-success">Guardar Producto</button>
+                            <button type="button" class="btn btn-outline" onclick="toggleProductForm()">Cancelar</button>
+                        </div>
+                    </form>
+                </div>
+
+                <div class="table-container">
+                    <table>
+                        <thead>
+                            <tr>
+                                <th>Img</th>
+                                <th>Nombre</th>
+                                <th>Precio</th>
+                                <th>Tag</th>
+                                <th>Acciones</th>
+                            </tr>
+                        </thead>
+                        <tbody id="products-body">
+                            <!-- Products injected here -->
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+
+            <!-- VIEW: SETTINGS -->
+            <div id="view-settings" class="view-section">
+                <div class="header">
+                    <h1>⚙️ Configuración del Sistema</h1>
+                </div>
+
+                <div class="form-card">
+                    <h2>QR de Pagos (Bancolombia)</h2>
+                    <p style="color: #666; margin-bottom: 20px;">Actualiza el código QR que se muestra a los clientes durante el checkout.</p>
+                    
+                    <div class="form-group">
+                        <label>Ruta de la imagen QR</label>
+                        <input type="text" id="setting-qr-path" placeholder="imagenes/qr_bancolombia.png">
+                    </div>
+                    
+                    <div class="qr-preview" id="qr-preview-container">
+                        <p style="font-size: 0.8rem; color: #888; margin-bottom: 10px;">Vista previa actual:</p>
+                        <img src="" id="current-qr-img" style="width: 100%; border-radius: 8px;">
+                    </div>
+                    
+                    <button class="btn btn-primary" onclick="saveSettings()">Guardar Configuración</button>
+                </div>
+
+                <div class="form-card" style="border-top: 5px solid var(--danger);">
+                    <h2 style="color: var(--danger);">Zona de Peligro</h2>
+                    <p>Estas acciones no se pueden deshacer.</p>
+                    <button class="btn btn-danger" onclick="factoryReset()"><i class="fas fa-exclamation-triangle"></i> Restaurar Productos de Fábrica</button>
+                </div>
+            </div>
+        </main>
     </div>
 
     <script>
-        function loadOrders() {
-            const orders = JSON.parse(localStorage.getItem('anilina_orders') || '[]');
-            const body = document.getElementById('orders-body');
-            const emptyMsg = document.getElementById('empty-msg');
-            const totalOrders = document.getElementById('total-orders');
-            const totalSales = document.getElementById('total-sales');
+        // Data Management
+        let products = [];
+        let orders = [];
 
-            if (orders.length === 0) {
-                emptyMsg.style.display = 'block';
-                document.getElementById('orders-table').style.display = 'none';
-                totalOrders.innerText = '0';
-                totalSales.innerText = '$0';
-                return;
-            }
-
-            emptyMsg.style.display = 'none';
-            document.getElementById('orders-table').style.display = 'table';
-            
-            let salesSum = 0;
-            const sortedOrders = [...orders].reverse();
-            
-            body.innerHTML = sortedOrders.map(order => {
-                salesSum += order.total;
-                const itemsList = order.items.map(item => `<span class="badge">${item.quantity}x ${item.name}</span>`).join(' ');
-                
-                // Status Badge Color
-                const statusColor = (order.status || 'Pendiente') === 'Pendiente' ? '#ff9800' : '#25d366';
-                
-                return `
-                    <tr class="order-row">
-                        <td><strong>${order.ref || '---'}</strong></td>
-                        <td>${order.date}</td>
-                        <td><strong>${order.customer.name}</strong><br><small>${order.customer.address}</small></td>
-                        <td>${order.customer.phone}<br><small>${order.customer.email}</small></td>
-                        <td>${itemsList}</td>
-                        <td><strong>$${order.total.toLocaleString()}</strong></td>
-                        <td>
-                            <span class="status-badge" style="background: ${statusColor}; color: white; padding: 4px 10px; border-radius: 20px; font-size: 0.75rem; font-weight: 700;">
-                                ${order.status || 'Pendiente'}
-                            </span>
-                        </td>
-                        <td style="display: flex; gap: 5px;">
-                            <button class="btn" title="Cambiar Estado" style="background: #555; color: white; padding: 5px 10px;" onclick="toggleStatus(${order.id})">
-                                <i class="fas fa-sync-alt"></i>
-                            </button>
-                            <button class="btn" title="Eliminar" style="background: #ff4d4d; color: white; padding: 5px 10px;" onclick="deleteOrder(${order.id})">
-                                <i class="fas fa-trash-alt"></i>
-                            </button>
-                        </td>
-                    </tr>
-                `;
-            }).join('');
-
-            totalOrders.innerText = orders.length;
-            totalSales.innerText = `$${salesSum.toLocaleString()}`;
+        function init() {
+            loadData();
+            renderOrders();
+            renderProducts();
+            renderSettings();
         }
 
-        function toggleStatus(id) {
-            let orders = JSON.parse(localStorage.getItem('anilina_orders') || '[]');
-            const index = orders.findIndex(o => o.id === id);
-            if (index !== -1) {
-                orders[index].status = orders[index].status === 'Pendiente' ? 'Pagado' : 'Pendiente';
+        function loadData() {
+            orders = JSON.parse(localStorage.getItem('anilina_orders') || '[]');
+            products = JSON.parse(localStorage.getItem('anilina_products') || '[]');
+            
+            // If no products, we'll try to get them from app.js context via a temporary bridge 
+            // or just wait for the user to add them. 
+            // Better: We'll assume app.js will populate localStorage if empty.
+            if (products.length === 0) {
+                console.log("No products found in storage. They will be loaded from app.js on first visit.");
+            }
+        }
+
+        // View Switching
+        function showView(view, event) {
+            document.querySelectorAll('.view-section').forEach(s => s.classList.remove('active'));
+            document.querySelectorAll('.nav-item').forEach(n => n.classList.remove('active'));
+            
+            document.getElementById('view-' + view).classList.add('active');
+            if (event) event.currentTarget.classList.add('active');
+        }
+
+        // ORDERS LOGIC
+        function renderOrders() {
+            const body = document.getElementById('orders-body');
+            const sorted = [...orders].reverse();
+            
+            let totalVentas = 0;
+            
+            if (sorted.length === 0) {
+                body.innerHTML = '<tr><td colspan="6" style="text-align: center; padding: 40px; color: #999;">No hay pedidos registrados yet.</td></tr>';
+            } else {
+                body.innerHTML = sorted.map(order => {
+                    totalVentas += order.total;
+                    const statusClass = (order.status || 'Pendiente') === 'Pendiente' ? 'badge-pending' : 'badge-paid';
+                    
+                    return `
+                        <tr>
+                            <td><strong>${order.ref}</strong></td>
+                            <td><small>${order.date}</small></td>
+                            <td>
+                                <strong>${order.customer.name}</strong><br>
+                                <small>${order.customer.phone}</small>
+                            </td>
+                            <td>$${order.total.toLocaleString()}</td>
+                            <td><span class="badge ${statusClass}">${order.status || 'Pendiente'}</span></td>
+                            <td>
+                                <div style="display: flex; gap: 5px;">
+                                    <button class="btn btn-outline" style="padding: 5px 10px;" onclick="toggleOrderStatus(${order.id})" title="Cambiar Estado">
+                                        <i class="fas fa-sync"></i>
+                                    </button>
+                                    <button class="btn btn-danger" style="padding: 5px 10px;" onclick="deleteOrder(${order.id})" title="Eliminar">
+                                        <i class="fas fa-trash"></i>
+                                    </button>
+                                </div>
+                            </td>
+                        </tr>
+                    `;
+                }).join('');
+            }
+
+            document.getElementById('stat-total-orders').innerText = orders.length;
+            document.getElementById('stat-total-sales').innerText = '$' + totalVentas.toLocaleString();
+        }
+
+        function toggleOrderStatus(id) {
+            const idx = orders.findIndex(o => o.id === id);
+            if (idx !== -1) {
+                orders[idx].status = orders[idx].status === 'Pendiente' ? 'Pagado' : 'Pendiente';
                 localStorage.setItem('anilina_orders', JSON.stringify(orders));
-                loadOrders();
+                renderOrders();
             }
         }
 
         function deleteOrder(id) {
-            if (confirm('¿Estás seguro de que quieres borrar este pedido?')) {
-                let orders = JSON.parse(localStorage.getItem('anilina_orders') || '[]');
-                orders = orders.filter(order => order.id !== id);
+            if (confirm('¿Eliminar este pedido permanentemente?')) {
+                orders = orders.filter(o => o.id !== id);
                 localStorage.setItem('anilina_orders', JSON.stringify(orders));
-                loadOrders();
+                renderOrders();
             }
         }
 
         function clearOrders() {
-            if (confirm('¿Estás seguro de que quieres borrar TODOS los datos?')) {
-                localStorage.removeItem('anilina_orders');
-                loadOrders();
+            if (confirm('¿ESTÁS SEGURO DE BORRAR TODOS LOS PEDIDOS? Esta acción es irreversible.')) {
+                localStorage.setItem('anilina_orders', '[]');
+                orders = [];
+                renderOrders();
             }
         }
 
-        function exportToCSV() {
-            const orders = JSON.parse(localStorage.getItem('anilina_orders') || '[]');
-            if (orders.length === 0) return;
+        // PRODUCTS LOGIC
+        function renderProducts() {
+            const body = document.getElementById('products-body');
+            if (products.length === 0) {
+                body.innerHTML = '<tr><td colspan="5" style="text-align: center; padding: 40px; color: #999;">No hay productos en el inventario.</td></tr>';
+                return;
+            }
 
+            body.innerHTML = products.map(p => {
+                let tagLabel = 'General';
+                let tagClass = 'badge-general';
+                if (p.tag === 'latest') { tagLabel = 'Nuevo'; tagClass = 'badge-new'; }
+                if (p.promo) { tagLabel = 'Promo'; tagClass = 'badge-promo'; }
+
+                return `
+                    <tr>
+                        <td class="product-img-td"><img src="${p.image}" onerror="this.src='https://via.placeholder.com/40'"></td>
+                        <td><strong>${p.name}</strong></td>
+                        <td>$${p.price.toLocaleString()}</td>
+                        <td><span class="badge ${tagClass}">${tagLabel}</span></td>
+                        <td>
+                            <div style="display: flex; gap: 5px;">
+                                <button class="btn btn-outline" style="padding: 5px 10px;" onclick="editProduct(${p.id})" title="Editar">
+                                    <i class="fas fa-edit"></i>
+                                </button>
+                                <button class="btn btn-danger" style="padding: 5px 10px;" onclick="deleteProduct(${p.id})" title="Eliminar">
+                                    <i class="fas fa-trash"></i>
+                                </button>
+                            </div>
+                        </td>
+                    </tr>
+                `;
+            }).join('');
+        }
+
+        function toggleProductForm() {
+            const container = document.getElementById('product-form-container');
+            const isVisible = container.style.display === 'block';
+            container.style.display = isVisible ? 'none' : 'block';
+            if (!isVisible) {
+                document.getElementById('product-form').reset();
+                document.getElementById('edit-id').value = '';
+                document.getElementById('form-title').innerText = "Agregar Nuevo Producto";
+                clearProductImage();
+            }
+        }
+
+        // Image Handling Logic
+        const dropZone = document.getElementById('image-drop-zone');
+        const imageInput = document.getElementById('prod-image-file');
+        const hiddenImageInput = document.getElementById('prod-image');
+        const previewWrapper = document.getElementById('image-preview-wrapper');
+        const previewImg = document.getElementById('image-preview-img');
+
+        dropZone.onclick = () => imageInput.click();
+
+        imageInput.onchange = (e) => handleFiles(e.target.files);
+
+        dropZone.addEventListener('dragover', (e) => {
+            e.preventDefault();
+            dropZone.classList.add('dragover');
+        });
+
+        dropZone.addEventListener('dragleave', () => {
+            dropZone.classList.remove('dragover');
+        });
+
+        dropZone.addEventListener('drop', (e) => {
+            e.preventDefault();
+            dropZone.classList.remove('dragover');
+            handleFiles(e.dataTransfer.files);
+        });
+
+        window.addEventListener('paste', (e) => {
+            if (document.getElementById('product-form-container').style.display === 'block') {
+                const items = (e.clipboardData || e.originalEvent.clipboardData).items;
+                for (let index in items) {
+                    const item = items[index];
+                    if (item.kind === 'file') {
+                        handleFiles([item.getAsFile()]);
+                    }
+                }
+            }
+        });
+
+        function handleFiles(files) {
+            if (files.length === 0) return;
+            const file = files[0];
+            if (!file.type.startsWith('image/')) {
+                alert('Por favor selecciona un archivo de imagen válido.');
+                return;
+            }
+
+            const reader = new FileReader();
+            reader.onload = (e) => {
+                const img = new Image();
+                img.onload = () => {
+                    // Create canvas for compression
+                    const canvas = document.createElement('canvas');
+                    let width = img.width;
+                    let height = img.height;
+
+                    // Resize to max 800px width/height while maintaining aspect ratio
+                    const max_size = 800;
+                    if (width > height) {
+                        if (width > max_size) {
+                            height *= max_size / width;
+                            width = max_size;
+                        }
+                    } else {
+                        if (height > max_size) {
+                            width *= max_size / height;
+                            height = max_size;
+                        }
+                    }
+
+                    canvas.width = width;
+                    canvas.height = height;
+                    const ctx = canvas.getContext('2d');
+                    ctx.drawImage(img, 0, 0, width, height);
+
+                    // Compress to JPEG with 0.7 quality
+                    const compressedBase64 = canvas.toDataURL('image/jpeg', 0.7);
+                    setProductImage(compressedBase64);
+                };
+                img.src = e.target.result;
+            };
+            reader.readAsDataURL(file);
+        }
+
+        function setProductImage(src) {
+            hiddenImageInput.value = src;
+            previewImg.src = src;
+            previewWrapper.style.display = 'block';
+        }
+
+        function clearProductImage(e) {
+            if (e) e.stopPropagation();
+            hiddenImageInput.value = '';
+            previewImg.src = '';
+            previewWrapper.style.display = 'none';
+            imageInput.value = '';
+        }
+
+        document.getElementById('product-form').addEventListener('submit', (e) => {
+            e.preventDefault();
+            const id = document.getElementById('edit-id').value;
+            const name = document.getElementById('prod-name').value;
+            const price = parseInt(document.getElementById('prod-price').value);
+            const tag = document.getElementById('prod-tag').value;
+            const image = document.getElementById('prod-image').value;
+            const oldPrice = parseInt(document.getElementById('prod-old-price').value) || null;
+
+            if (!image) {
+                alert('Por favor añade una imagen al producto.');
+                return;
+            }
+
+            const productData = {
+                id: id ? parseInt(id) : Date.now(),
+                name,
+                price,
+                image,
+                tag: tag === 'latest' ? 'latest' : null,
+                promo: tag === 'promo',
+                oldPrice: tag === 'promo' ? oldPrice : null
+            };
+
+            if (id) {
+                const idx = products.findIndex(p => p.id === parseInt(id));
+                products[idx] = productData;
+            } else {
+                products.push(productData);
+            }
+
+            try {
+                localStorage.setItem('anilina_products', JSON.stringify(products));
+                renderProducts();
+                toggleProductForm();
+                alert('¡Producto guardado con éxito!');
+            } catch (err) {
+                console.error("Storage error:", err);
+                alert('Error: El espacio de almacenamiento está lleno. Intenta con una imagen más pequeña o elimina productos antiguos.');
+            }
+        });
+
+        function editProduct(id) {
+            const p = products.find(p => p.id === id);
+            if (!p) return;
+
+            document.getElementById('edit-id').value = p.id;
+            document.getElementById('prod-name').value = p.name;
+            document.getElementById('prod-price').value = p.price;
+            document.getElementById('prod-image').value = p.image;
+            document.getElementById('prod-old-price').value = p.oldPrice || '';
+            
+            let tagValue = 'none';
+            if (p.tag === 'latest') tagValue = 'latest';
+            if (p.promo) tagValue = 'promo';
+            document.getElementById('prod-tag').value = tagValue;
+
+            setProductImage(p.image);
+
+            document.getElementById('form-title').innerText = "Editar Producto";
+            document.getElementById('product-form-container').style.display = 'block';
+            window.scrollTo({ top: 0, behavior: 'smooth' });
+        }
+
+        function deleteProduct(id) {
+            if (confirm('¿Eliminar este producto del inventario?')) {
+                products = products.filter(p => p.id !== id);
+                localStorage.setItem('anilina_products', JSON.stringify(products));
+                renderProducts();
+            }
+        }
+
+        // SETTINGS LOGIC
+        function renderSettings() {
+            const qrPath = localStorage.getItem('anilina_qr_path') || 'imagenes/qr_bancolombia.png';
+            document.getElementById('setting-qr-path').value = qrPath;
+            document.getElementById('current-qr-img').src = qrPath;
+        }
+
+        function saveSettings() {
+            const path = document.getElementById('setting-qr-path').value;
+            localStorage.setItem('anilina_qr_path', path);
+            document.getElementById('current-qr-img').src = path;
+            alert('Configuración de QR guardada correctamente. Se aplicará en el checkout de la tienda.');
+        }
+
+        function factoryReset() {
+            if (confirm('¿Estás seguro? Se borrarán todos tus productos personalizados y se volverá a la lista inicial del sistema.')) {
+                localStorage.removeItem('anilina_products');
+                alert('Productos reiniciados. Refresca la tienda para volver a cargar los datos originales.');
+                location.reload(); 
+            }
+        }
+
+        function exportOrders() {
+            if (orders.length === 0) {
+                alert('No hay pedidos para exportar.');
+                return;
+            }
             let csv = 'Referencia,Fecha,Nombre,Email,Telefono,Direccion,Productos,Total,Estado\n';
             orders.forEach(order => {
                 const items = order.items.map(i => `${i.quantity} ${i.name}`).join(' | ');
-                csv += `"${order.ref || '---'}","${order.date}","${order.customer.name}","${order.customer.email}","${order.customer.phone}","${order.customer.address}","${items}","${order.total}","${order.status || 'Pendiente'}"\n`;
+                csv += `"${order.ref}","${order.date}","${order.customer.name}","${order.customer.email}","${order.customer.phone}","${order.customer.address}","${items}","${order.total}","${order.status || 'Pendiente'}"\n`;
             });
 
             const blob = new Blob([csv], { type: 'text/csv;charset=utf-8;' });
             const link = document.createElement("a");
             const url = URL.createObjectURL(blob);
             link.setAttribute("href", url);
-            link.setAttribute("download", "clientes_anilina.csv");
-            link.style.visibility = 'hidden';
-            document.body.appendChild(link);
+            link.setAttribute("download", `pedidos_anilina_${new Date().toISOString().split('T')[0]}.csv`);
             link.click();
-            document.body.removeChild(link);
         }
 
-        document.addEventListener('DOMContentLoaded', loadOrders);
+        window.onload = init;
     </script>
 </body>
 </html>
