@@ -507,6 +507,12 @@ img {
     text-shadow: 0 1px 2px rgba(0,0,0,0.1);
 }
 
+@media (max-width: 768px) {
+    .whatsapp-float {
+        bottom: 85px; /* Subido para que no tape el candado en el footer en móvil */
+    }
+}
+
 .whatsapp-float:hover {
     transform: translateY(-3px) scale(1.05);
     box-shadow: 0 12px 30px rgba(37, 211, 102, 0.35);
@@ -807,10 +813,10 @@ img {
 .admin-access-btn {
     background: none;
     border: none;
-    color: #555; /* Slightly lighter for visibility on dark footer */
+    color: #bbb; /* Gris más claro como solicitó el usuario */
     font-size: 0.8rem; /* Increased size */
     cursor: pointer;
-    opacity: 0.4;
+    opacity: 0.7;
     padding: 5px;
     margin-left: 15px; /* Separate it from the copyright text */
     transition: var(--transition);
