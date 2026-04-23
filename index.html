@@ -76,6 +76,20 @@
             <span>Nuestros Favoritos</span>
             <h2>Colección Completa</h2>
         </div>
+
+        <!-- Categorías / Filtros -->
+        <div class="category-nav">
+            <button class="cat-btn active" onclick="filterByCategory('all')">Todos</button>
+            <button class="cat-btn" onclick="filterByCategory('bolsos')">Bolsos</button>
+            <button class="cat-btn" onclick="filterByCategory('carteras')">Carteras</button>
+            <button class="cat-btn" onclick="filterByCategory('relojes')">Relojes</button>
+            <button class="cat-btn" onclick="filterByCategory('aretes')">Aretes</button>
+            <button class="cat-btn" onclick="filterByCategory('sets')">Conjuntos</button>
+            <button class="cat-btn" onclick="filterByCategory('anillos')">Anillos</button>
+            <button class="cat-btn" onclick="filterByCategory('cadenas')">Cadenas</button>
+            <button class="cat-btn" onclick="filterByCategory('collares')">Collares</button>
+        </div>
+
         <div class="products-grid" id="products-container">
             <!-- Products will be injected by JS -->
         </div>

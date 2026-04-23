@@ -186,6 +186,15 @@
         .badge-promo { background: #ffebee; color: #f44336; }
         .badge-new { background: #e3f2fd; color: #2196f3; }
         .badge-general { background: #f0f0f0; color: #777; }
+        .badge-bolsos { background: #e0f2f1; color: #009688; }
+        .badge-carteras { background: #f1f8e9; color: #558b2f; }
+        .badge-relojes { background: #ede7f6; color: #512da8; }
+        .badge-aretes { background: #fffde7; color: #fbc02d; }
+        .badge-sets { background: #f3e5f5; color: #9c27b0; }
+        .badge-anillos { background: #e1f5fe; color: #0288d1; }
+        .badge-cadenas { background: #efebe9; color: #5d4037; }
+        .badge-dijes { background: #fce4ec; color: #c2185b; }
+        .badge-collares { background: #fff3e0; color: #e65100; }
 
         /* Forms */
         .form-card {
@@ -456,6 +465,15 @@
                                     <option value="none">General</option>
                                     <option value="latest">Nueva Colección</option>
                                     <option value="promo">En Promoción</option>
+                                    <option value="bolsos">Bolsos</option>
+                                    <option value="carteras">Carteras</option>
+                                    <option value="relojes">Relojes</option>
+                                    <option value="aretes">Aretes</option>
+                                    <option value="sets">Sets / Conjuntos</option>
+                                    <option value="anillos">Anillos</option>
+                                    <option value="cadenas">Cadenas</option>
+                                    <option value="dijes">Dijes</option>
+                                    <option value="collares">Collares</option>
                                 </select>
                             </div>
                             <div class="form-group">
@@ -709,8 +727,18 @@
             body.innerHTML = products.map(p => {
                 let tagLabel = 'General';
                 let tagClass = 'badge-general';
+                
                 if (p.tag === 'latest') { tagLabel = 'Nuevo'; tagClass = 'badge-new'; }
-                if (p.promo) { tagLabel = 'Promo'; tagClass = 'badge-promo'; }
+                else if (p.promo) { tagLabel = 'Promo'; tagClass = 'badge-promo'; }
+                else if (p.tag === 'bolsos') { tagLabel = 'Bolso'; tagClass = 'badge-bolsos'; }
+                else if (p.tag === 'carteras') { tagLabel = 'Cartera'; tagClass = 'badge-carteras'; }
+                else if (p.tag === 'relojes') { tagLabel = 'Reloj'; tagClass = 'badge-relojes'; }
+                else if (p.tag === 'aretes') { tagLabel = 'Aretes'; tagClass = 'badge-aretes'; }
+                else if (p.tag === 'sets') { tagLabel = 'Set'; tagClass = 'badge-sets'; }
+                else if (p.tag === 'anillos') { tagLabel = 'Anillo'; tagClass = 'badge-anillos'; }
+                else if (p.tag === 'cadenas') { tagLabel = 'Cadena'; tagClass = 'badge-cadenas'; }
+                else if (p.tag === 'dijes') { tagLabel = 'Dije'; tagClass = 'badge-dijes'; }
+                else if (p.tag === 'collares') { tagLabel = 'Collar'; tagClass = 'badge-collares'; }
 
                 return `
                     <tr>
@@ -815,7 +843,7 @@
                 name,
                 price,
                 image,
-                tag: tag === 'latest' ? 'latest' : null,
+                tag: (tag === 'latest' || tag === 'conjuntos' || tag === 'carteras' || tag === 'bolsos') ? tag : null,
                 promo: tag === 'promo',
                 oldPrice: tag === 'promo' ? oldPrice : null
             };
@@ -845,8 +873,7 @@
             document.getElementById('prod-price').value = p.price;
             document.getElementById('prod-image').value = p.image;
             document.getElementById('prod-old-price').value = p.oldPrice || '';
-            let tagValue = 'none';
-            if (p.tag === 'latest') tagValue = 'latest';
+            let tagValue = p.tag || 'none';
             if (p.promo) tagValue = 'promo';
             document.getElementById('prod-tag').value = tagValue;
             setProductImage(p.image);

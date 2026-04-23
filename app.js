@@ -116,6 +116,15 @@ function createProductHTML(product) {
         <div class="product-card">
             ${product.promo ? '<span class="badge sale">SALE</span>' : ''}
             ${product.tag === 'latest' ? '<span class="badge new">NUEVO</span>' : ''}
+            ${product.tag === 'bolsos' ? '<span class="badge bag">BOLSO</span>' : ''}
+            ${product.tag === 'carteras' ? '<span class="badge bag">CARTERA</span>' : ''}
+            ${product.tag === 'relojes' ? '<span class="badge relojes">RELOJ</span>' : ''}
+            ${product.tag === 'aretes' ? '<span class="badge aretes">ARETES</span>' : ''}
+            ${product.tag === 'sets' ? '<span class="badge sets">SET</span>' : ''}
+            ${product.tag === 'anillos' ? '<span class="badge anillos">ANILLO</span>' : ''}
+            ${product.tag === 'cadenas' ? '<span class="badge cadenas">CADENA</span>' : ''}
+            ${product.tag === 'collares' ? '<span class="badge collares">COLLAR</span>' : ''}
+            ${product.tag === 'dijes' ? '<span class="badge dijes">DIJE</span>' : ''}
             <div class="product-img">
                 <img src="${product.image}" alt="${product.name}">
             </div>
@@ -131,15 +140,37 @@ function createProductHTML(product) {
     `;
 }
 
+let currentCategory = 'all';
+
+function filterByCategory(category) {
+    currentCategory = category;
+    
+    // Update active button
+    document.querySelectorAll('.cat-btn').forEach(btn => {
+        btn.classList.remove('active');
+        if (btn.getAttribute('onclick').includes(`'${category}'`)) {
+            btn.classList.add('active');
+        }
+    });
+
+    displayProducts();
+}
+
 function displayProducts() {
-    // Filter products
+    // Filter products for sections
     const promoProducts = products.filter(p => p.promo);
     const latestProducts = products.filter(p => p.tag === 'latest');
+    
+    // Filter products for the main collection based on selected category
+    let mainProducts = products;
+    if (currentCategory !== 'all') {
+        mainProducts = products.filter(p => p.tag === currentCategory);
+    }
     
     // Render in respective containers
     promoContainer.innerHTML = promoProducts.map(p => createProductHTML(p)).join('');
     latestContainer.innerHTML = latestProducts.map(p => createProductHTML(p)).join('');
-    productsContainer.innerHTML = products.map(p => createProductHTML(p)).join('');
+    productsContainer.innerHTML = mainProducts.map(p => createProductHTML(p)).join('');
 }
 
 // Cart Logic

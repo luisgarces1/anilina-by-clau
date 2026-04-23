@@ -311,6 +311,39 @@ img {
     font-size: 2.5rem;
 }
 
+/* Category Navigation */
+.category-nav {
+    display: flex;
+    justify-content: center;
+    gap: 10px;
+    margin-bottom: 40px;
+    flex-wrap: wrap;
+    padding: 0 10px;
+}
+
+.cat-btn {
+    padding: 8px 20px;
+    border: 1px solid #ddd;
+    background: white;
+    border-radius: 25px;
+    cursor: pointer;
+    font-weight: 600;
+    font-size: 0.85rem;
+    transition: var(--transition);
+    color: #666;
+}
+
+.cat-btn:hover {
+    border-color: var(--primary-color);
+    color: var(--primary-color);
+}
+
+.cat-btn.active {
+    background-color: var(--primary-color);
+    color: white;
+    border-color: var(--primary-color);
+}
+
 .products-grid {
     display: grid;
     grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
@@ -404,6 +437,22 @@ img {
     background-color: var(--accent-color);
     color: white;
 }
+
+.badge.set, .badge.sets {
+    background-color: #9c27b0;
+    color: white;
+}
+
+.badge.bag, .badge.bolsos, .badge.carteras {
+    background-color: #009688;
+    color: white;
+}
+
+.badge.relojes { background-color: #512da8; color: white; }
+.badge.aretes { background-color: #fbc02d; color: black; }
+.badge.anillos { background-color: #0288d1; color: white; }
+.badge.cadenas { background-color: #5d4037; color: white; }
+.badge.collares, .badge.dijes { background-color: #e65100; color: white; }
 
 /* Price Styles */
 .price-container {
