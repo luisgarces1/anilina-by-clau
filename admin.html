@@ -345,6 +345,8 @@
             .form-grid { grid-template-columns: 1fr; }
         }
     </style>
+    <!-- Supabase SDK -->
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 </head>
 <body>
     <div class="admin-layout">
@@ -530,26 +532,48 @@
     </div>
 
     <script>
+        // Supabase Configuration
+        const SUPABASE_URL = 'https://eaihwvmgcjizjbieptyy.supabase.co';
+        const SUPABASE_KEY = 'sb_publishable_Dyq-Mz28xU4r_sI0vGyQ_A_jYkqg6hy';
+        const supabaseDB = supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
+
         // Data Management
         let products = [];
         let orders = [];
 
-        function init() {
-            loadData();
-            renderOrders();
-            renderProducts();
+        async function init() {
+            await loadData();
             renderSettings();
         }
 
-        function loadData() {
-            orders = JSON.parse(localStorage.getItem('anilina_orders') || '[]');
-            products = JSON.parse(localStorage.getItem('anilina_products') || '[]');
-            
-            // If no products, we'll try to get them from app.js context via a temporary bridge 
-            // or just wait for the user to add them. 
-            // Better: We'll assume app.js will populate localStorage if empty.
-            if (products.length === 0) {
-                console.log("No products found in storage. They will be loaded from app.js on first visit.");
+        async function loadData() {
+            try {
+                // Load Orders
+                const { data: ordersData, error: ordersError } = await supabaseDB
+                    .from('orders')
+                    .select('*')
+                    .order('created_at', { ascending: false });
+                
+                if (ordersError) throw ordersError;
+                orders = ordersData;
+                renderOrders();
+
+                // Load Products
+                const { data: productsData, error: productsError } = await supabaseDB
+                    .from('products')
+                    .select('*');
+                
+                if (productsError) throw productsError;
+                products = productsData;
+                renderProducts();
+
+            } catch (err) {
+                console.error("Error loading data from Supabase:", err);
+                // Fallback to local
+                orders = JSON.parse(localStorage.getItem('anilina_orders') || '[]');
+                products = JSON.parse(localStorage.getItem('anilina_products') || '[]');
+                renderOrders();
+                renderProducts();
             }
         }
 
@@ -565,21 +589,20 @@
         // ORDERS LOGIC
         function renderOrders() {
             const body = document.getElementById('orders-body');
-            const sorted = [...orders].reverse();
-            
             let totalVentas = 0;
             
-            if (sorted.length === 0) {
+            if (orders.length === 0) {
                 body.innerHTML = '<tr><td colspan="6" style="text-align: center; padding: 40px; color: #999;">No hay pedidos registrados yet.</td></tr>';
             } else {
-                body.innerHTML = sorted.map(order => {
+                body.innerHTML = orders.map(order => {
                     totalVentas += order.total;
                     const statusClass = (order.status || 'Pendiente') === 'Pendiente' ? 'badge-pending' : 'badge-paid';
+                    const orderDate = order.created_at ? new Date(order.created_at).toLocaleString() : 'N/A';
                     
                     return `
                         <tr>
                             <td><strong>${order.ref}</strong></td>
-                            <td><small>${order.date}</small></td>
+                            <td><small>${orderDate}</small></td>
                             <td>
                                 <strong>${order.customer.name}</strong><br>
                                 <small>${order.customer.phone}</small>
@@ -605,28 +628,49 @@
             document.getElementById('stat-total-sales').innerText = '$' + totalVentas.toLocaleString();
         }
 
-        function toggleOrderStatus(id) {
-            const idx = orders.findIndex(o => o.id === id);
-            if (idx !== -1) {
-                orders[idx].status = orders[idx].status === 'Pendiente' ? 'Pagado' : 'Pendiente';
-                localStorage.setItem('anilina_orders', JSON.stringify(orders));
-                renderOrders();
+        async function toggleOrderStatus(id) {
+            const order = orders.find(o => o.id === id);
+            if (!order) return;
+
+            const newStatus = order.status === 'Pendiente' ? 'Pagado' : 'Pendiente';
+
+            try {
+                const { error } = await supabaseDB
+                    .from('orders')
+                    .update({ status: newStatus })
+                    .eq('id', id);
+                
+                if (error) throw error;
+                await loadData();
+            } catch (err) {
+                console.error("Error updating status:", err);
+                alert("Error al actualizar el estado");
             }
         }
 
-        function deleteOrder(id) {
+        async function deleteOrder(id) {
             if (confirm('¿Eliminar este pedido permanentemente?')) {
-                orders = orders.filter(o => o.id !== id);
-                localStorage.setItem('anilina_orders', JSON.stringify(orders));
-                renderOrders();
+                try {
+                    const { error } = await supabaseDB.from('orders').delete().eq('id', id);
+                    if (error) throw error;
+                    await loadData();
+                } catch (err) {
+                    console.error("Error deleting order:", err);
+                    alert("Error al eliminar el pedido");
+                }
             }
         }
 
-        function clearOrders() {
+        async function clearOrders() {
             if (confirm('¿ESTÁS SEGURO DE BORRAR TODOS LOS PEDIDOS? Esta acción es irreversible.')) {
-                localStorage.setItem('anilina_orders', '[]');
-                orders = [];
-                renderOrders();
+                try {
+                    // Supabase doesn't have "truncate" via API easily, so we delete all
+                    const { error } = await supabaseDB.from('orders').delete().neq('id', 0);
+                    if (error) throw error;
+                    await loadData();
+                } catch (err) {
+                    console.error("Error clearing orders:", err);
+                }
             }
         }
 
@@ -677,7 +721,7 @@
             }
         }
 
-        // Image Handling Logic
+        // Image Handling Logic (Keep as is, but used by save)
         const dropZone = document.getElementById('image-drop-zone');
         const imageInput = document.getElementById('prod-image-file');
         const hiddenImageInput = document.getElementById('prod-image');
@@ -685,37 +729,20 @@
         const previewImg = document.getElementById('image-preview-img');
 
         dropZone.onclick = () => imageInput.click();
-
         imageInput.onchange = (e) => handleFiles(e.target.files, 'product');
-
-        dropZone.addEventListener('dragover', (e) => {
-            e.preventDefault();
-            dropZone.classList.add('dragover');
-        });
-
-        dropZone.addEventListener('dragleave', () => {
-            dropZone.classList.remove('dragover');
-        });
-
-        dropZone.addEventListener('drop', (e) => {
-            e.preventDefault();
-            dropZone.classList.remove('dragover');
-            handleFiles(e.dataTransfer.files, 'product');
-        });
+        dropZone.addEventListener('dragover', (e) => { e.preventDefault(); dropZone.classList.add('dragover'); });
+        dropZone.addEventListener('dragleave', () => { dropZone.classList.remove('dragover'); });
+        dropZone.addEventListener('drop', (e) => { e.preventDefault(); dropZone.classList.remove('dragover'); handleFiles(e.dataTransfer.files, 'product'); });
 
         window.addEventListener('paste', (e) => {
             const isProductView = document.getElementById('product-form-container').style.display === 'block';
             const isSettingsView = document.getElementById('view-settings').classList.contains('active');
-            
             const items = (e.clipboardData || e.originalEvent.clipboardData).items;
             for (let index in items) {
                 const item = items[index];
                 if (item.kind === 'file') {
-                    if (isProductView) {
-                        handleFiles([item.getAsFile()], 'product');
-                    } else if (isSettingsView) {
-                        handleFiles([item.getAsFile()], 'qr');
-                    }
+                    if (isProductView) handleFiles([item.getAsFile()], 'product');
+                    else if (isSettingsView) handleFiles([item.getAsFile()], 'qr');
                 }
             }
         });
@@ -723,11 +750,6 @@
         function handleFiles(files, target) {
             if (files.length === 0) return;
             const file = files[0];
-            if (!file.type.startsWith('image/')) {
-                alert('Por favor selecciona un archivo de imagen válido.');
-                return;
-            }
-
             const reader = new FileReader();
             reader.onload = (e) => {
                 const img = new Image();
@@ -735,75 +757,26 @@
                     const canvas = document.createElement('canvas');
                     let width = img.width;
                     let height = img.height;
-                    const max_size = target === 'qr' ? 600 : 800; // QR can be smaller
-
-                    if (width > height) {
-                        if (width > max_size) {
-                            height *= max_size / width;
-                            width = max_size;
-                        }
-                    } else {
-                        if (height > max_size) {
-                            width *= max_size / height;
-                            height = max_size;
-                        }
-                    }
-
-                    canvas.width = width;
-                    canvas.height = height;
+                    const max_size = target === 'qr' ? 600 : 800;
+                    if (width > height) { if (width > max_size) { height *= max_size / width; width = max_size; } }
+                    else { if (height > max_size) { width *= max_size / height; height = max_size; } }
+                    canvas.width = width; canvas.height = height;
                     const ctx = canvas.getContext('2d');
                     ctx.drawImage(img, 0, 0, width, height);
-
-                    const compressedBase64 = canvas.toDataURL('image/jpeg', target === 'qr' ? 0.8 : 0.7);
-                    
-                    if (target === 'product') {
-                        setProductImage(compressedBase64);
-                    } else if (target === 'qr') {
-                        setQRImage(compressedBase64);
-                    }
+                    const compressedBase64 = canvas.toDataURL('image/jpeg', 0.7);
+                    if (target === 'product') setProductImage(compressedBase64);
+                    else if (target === 'qr') setQRImage(compressedBase64);
                 };
                 img.src = e.target.result;
             };
             reader.readAsDataURL(file);
         }
 
-        // QR Handling Logic
-        const qrDropZone = document.getElementById('qr-drop-zone');
-        const qrImageInput = document.getElementById('qr-image-file');
-        const qrHiddenInput = document.getElementById('setting-qr-path');
-        const qrPreviewImg = document.getElementById('current-qr-img');
+        function setQRImage(src) { document.getElementById('setting-qr-path').value = src; document.getElementById('current-qr-img').src = src; }
+        function setProductImage(src) { hiddenImageInput.value = src; previewImg.src = src; previewWrapper.style.display = 'block'; }
+        function clearProductImage(e) { if (e) e.stopPropagation(); hiddenImageInput.value = ''; previewImg.src = ''; previewWrapper.style.display = 'none'; imageInput.value = ''; }
 
-        qrDropZone.onclick = () => qrImageInput.click();
-        qrImageInput.onchange = (e) => handleFiles(e.target.files, 'qr');
-
-        qrDropZone.addEventListener('dragover', (e) => { e.preventDefault(); qrDropZone.classList.add('dragover'); });
-        qrDropZone.addEventListener('dragleave', () => { qrDropZone.classList.remove('dragover'); });
-        qrDropZone.addEventListener('drop', (e) => {
-            e.preventDefault();
-            qrDropZone.classList.remove('dragover');
-            handleFiles(e.dataTransfer.files, 'qr');
-        });
-
-        function setQRImage(src) {
-            qrHiddenInput.value = src;
-            qrPreviewImg.src = src;
-        }
-
-        function setProductImage(src) {
-            hiddenImageInput.value = src;
-            previewImg.src = src;
-            previewWrapper.style.display = 'block';
-        }
-
-        function clearProductImage(e) {
-            if (e) e.stopPropagation();
-            hiddenImageInput.value = '';
-            previewImg.src = '';
-            previewWrapper.style.display = 'none';
-            imageInput.value = '';
-        }
-
-        document.getElementById('product-form').addEventListener('submit', (e) => {
+        document.getElementById('product-form').addEventListener('submit', async (e) => {
             e.preventDefault();
             const id = document.getElementById('edit-id').value;
             const name = document.getElementById('prod-name').value;
@@ -812,13 +785,9 @@
             const image = document.getElementById('prod-image').value;
             const oldPrice = parseInt(document.getElementById('prod-old-price').value) || null;
 
-            if (!image) {
-                alert('Por favor añade una imagen al producto.');
-                return;
-            }
+            if (!image) { alert('Por favor añade una imagen.'); return; }
 
             const productData = {
-                id: id ? parseInt(id) : Date.now(),
                 name,
                 price,
                 image,
@@ -827,51 +796,50 @@
                 oldPrice: tag === 'promo' ? oldPrice : null
             };
 
-            if (id) {
-                const idx = products.findIndex(p => p.id === parseInt(id));
-                products[idx] = productData;
-            } else {
-                products.push(productData);
-            }
-
             try {
-                localStorage.setItem('anilina_products', JSON.stringify(products));
-                renderProducts();
+                if (id) {
+                    const { error } = await supabaseDB.from('products').update(productData).eq('id', id);
+                    if (error) throw error;
+                } else {
+                    const { error } = await supabaseDB.from('products').insert([productData]);
+                    if (error) throw error;
+                }
+                await loadData();
                 toggleProductForm();
-                alert('¡Producto guardado con éxito!');
+                alert('¡Producto guardado!');
             } catch (err) {
-                console.error("Storage error:", err);
-                alert('Error: El espacio de almacenamiento está lleno. Intenta con una imagen más pequeña o elimina productos antiguos.');
+                console.error("Save error:", err);
+                alert('Error al guardar el producto.');
             }
         });
 
         function editProduct(id) {
             const p = products.find(p => p.id === id);
             if (!p) return;
-
             document.getElementById('edit-id').value = p.id;
             document.getElementById('prod-name').value = p.name;
             document.getElementById('prod-price').value = p.price;
             document.getElementById('prod-image').value = p.image;
             document.getElementById('prod-old-price').value = p.oldPrice || '';
-            
             let tagValue = 'none';
             if (p.tag === 'latest') tagValue = 'latest';
             if (p.promo) tagValue = 'promo';
             document.getElementById('prod-tag').value = tagValue;
-
             setProductImage(p.image);
-
             document.getElementById('form-title').innerText = "Editar Producto";
             document.getElementById('product-form-container').style.display = 'block';
             window.scrollTo({ top: 0, behavior: 'smooth' });
         }
 
-        function deleteProduct(id) {
-            if (confirm('¿Eliminar este producto del inventario?')) {
-                products = products.filter(p => p.id !== id);
-                localStorage.setItem('anilina_products', JSON.stringify(products));
-                renderProducts();
+        async function deleteProduct(id) {
+            if (confirm('¿Eliminar este producto?')) {
+                try {
+                    const { error } = await supabaseDB.from('products').delete().eq('id', id);
+                    if (error) throw error;
+                    await loadData();
+                } catch (err) {
+                    console.error("Delete error:", err);
+                }
             }
         }
 
@@ -879,7 +847,6 @@
         function renderSettings() {
             const qrPath = localStorage.getItem('anilina_qr_path') || 'imagenes/qr_bancolombia.png';
             const llaveId = localStorage.getItem('anilina_llave_id') || '@CMG o 3245334564';
-            
             document.getElementById('setting-qr-path').value = qrPath;
             document.getElementById('current-qr-img').src = qrPath;
             document.getElementById('setting-llave-id').value = llaveId;
@@ -888,38 +855,33 @@
         function saveSettings() {
             const path = document.getElementById('setting-qr-path').value;
             const llaveId = document.getElementById('setting-llave-id').value;
-            
             localStorage.setItem('anilina_qr_path', path);
             localStorage.setItem('anilina_llave_id', llaveId);
-            
-            document.getElementById('current-qr-img').src = path;
-            alert('Configuración guardada correctamente.');
+            alert('Configuración guardada localmente.');
         }
 
-        function factoryReset() {
-            if (confirm('¿Estás seguro? Se borrarán todos tus productos personalizados y se volverá a la lista inicial del sistema.')) {
-                localStorage.removeItem('anilina_products');
-                alert('Productos reiniciados. Refresca la tienda para volver a cargar los datos originales.');
-                location.reload(); 
+        async function factoryReset() {
+            if (confirm('¿Estás seguro de borrar todos los productos de la base de datos?')) {
+                try {
+                    await supabaseDB.from('products').delete().neq('id', 0);
+                    alert('Productos borrados. Refresca para recargar los iniciales.');
+                    location.reload();
+                } catch (err) { console.error(err); }
             }
         }
 
         function exportOrders() {
-            if (orders.length === 0) {
-                alert('No hay pedidos para exportar.');
-                return;
-            }
+            if (orders.length === 0) { alert('No hay pedidos.'); return; }
             let csv = 'Referencia,Fecha,Nombre,Email,Telefono,Direccion,Productos,Total,Estado\n';
             orders.forEach(order => {
                 const items = order.items.map(i => `${i.quantity} ${i.name}`).join(' | ');
-                csv += `"${order.ref}","${order.date}","${order.customer.name}","${order.customer.email}","${order.customer.phone}","${order.customer.address}","${items}","${order.total}","${order.status || 'Pendiente'}"\n`;
+                csv += `"${order.ref}","${order.created_at}","${order.customer.name}","${order.customer.email}","${order.customer.phone}","${order.customer.address}","${items}","${order.total}","${order.status}"\n`;
             });
-
             const blob = new Blob([csv], { type: 'text/csv;charset=utf-8;' });
             const link = document.createElement("a");
             const url = URL.createObjectURL(blob);
             link.setAttribute("href", url);
-            link.setAttribute("download", `pedidos_anilina_${new Date().toISOString().split('T')[0]}.csv`);
+            link.setAttribute("download", `pedidos_supabase_${new Date().toISOString().split('T')[0]}.csv`);
             link.click();
         }
 

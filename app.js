@@ -14,11 +14,33 @@ const initialProducts = [
     { id: 12, name: "Aretes Sol y Mar", price: 42000, image: "imagenes/WhatsApp Image 2026-04-21 at 6.03.03 PM.jpeg" }
 ];
 
-// Initialize Products from Storage or Defaults
-let products = JSON.parse(localStorage.getItem('anilina_products'));
-if (!products || products.length === 0) {
-    products = initialProducts;
-    localStorage.setItem('anilina_products', JSON.stringify(products));
+// Supabase Configuration
+const SUPABASE_URL = 'https://eaihwvmgcjizjbieptyy.supabase.co';
+const SUPABASE_KEY = 'sb_publishable_Dyq-Mz28xU4r_sI0vGyQ_A_jYkqg6hy'; // RECUERDA CAMBIAR ESTA POR LA QUE EMPIEZA POR eyJ
+const supabaseDB = supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
+
+let products = [];
+
+async function loadProducts() {
+    try {
+        const { data, error } = await supabaseDB.from('products').select('*');
+        if (error) throw error;
+        
+        if (!data || data.length === 0) {
+            // Seed defaults if database is empty
+            const { error: insertError } = await supabaseDB.from('products').insert(initialProducts);
+            if (insertError) console.error("Error seeding products:", insertError);
+            products = initialProducts;
+        } else {
+            products = data;
+        }
+        displayProducts();
+    } catch (err) {
+        console.error("Error loading products from Supabase:", err);
+        // Fallback to local if something fails
+        products = JSON.parse(localStorage.getItem('anilina_products')) || initialProducts;
+        displayProducts();
+    }
 }
 
 
@@ -62,22 +84,30 @@ function generateOrderRef() {
     return `AN-${result}`;
 }
 
-function saveOrder(customerData, cartItems, total, paymentMethod) {
-    const orders = JSON.parse(localStorage.getItem('anilina_orders') || '[]');
+async function saveOrder(customerData, cartItems, total, paymentMethod) {
     const newOrder = {
-        id: Date.now(),
         ref: generateOrderRef(),
-        date: new Date().toLocaleString(),
         customer: customerData,
         items: cartItems,
         total: total,
         paymentMethod: paymentMethod || 'Bancolombia',
-        status: 'Pendiente' // Default status
+        status: 'Pendiente'
     };
-    orders.push(newOrder);
-    localStorage.setItem('anilina_orders', JSON.stringify(orders));
-    lastOrderData = newOrder; // Save for WhatsApp
-    console.log("Orden guardada exitosamente:", newOrder);
+
+    try {
+        const { data, error } = await supabaseDB.from('orders').insert([newOrder]).select();
+        if (error) throw error;
+        
+        lastOrderData = data[0];
+        console.log("Orden guardada en Supabase:", lastOrderData);
+    } catch (err) {
+        console.error("Error saving order to Supabase:", err);
+        // Fallback to local so the user doesn't lose the sale
+        const orders = JSON.parse(localStorage.getItem('anilina_orders') || '[]');
+        orders.push({...newOrder, id: Date.now(), date: new Date().toLocaleString()});
+        localStorage.setItem('anilina_orders', JSON.stringify(orders));
+        lastOrderData = {...newOrder, id: Date.now()};
+    }
 }
 
 // Initialize Products
@@ -381,6 +411,6 @@ document.addEventListener('DOMContentLoaded', () => {
     }
     
     updateSettings();
-    displayProducts();
+    loadProducts(); // Load from Supabase
     updateCart();
 });
