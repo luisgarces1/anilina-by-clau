@@ -890,6 +890,9 @@
             }
         }
 
+        // Ejecutar inicialización al cargar la página
+        document.addEventListener('DOMContentLoaded', init);
+
         function exportOrders() {
             if (orders.length === 0) { alert('No hay pedidos.'); return; }
             let csv = 'Referencia,Fecha,Nombre,Email,Telefono,Direccion,Productos,Total,Estado\n';
