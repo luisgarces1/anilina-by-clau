@@ -562,37 +562,41 @@
         let orders = [];
 
         async function init() {
+            console.log("Iniciando conexión con Supabase...");
             await loadData();
             renderSettings();
         }
 
         async function loadData() {
+            // Cargar Pedidos (Independiente)
             try {
-                // Load Orders
                 const { data: ordersData, error: ordersError } = await supabaseDB
                     .from('orders')
                     .select('*')
                     .order('created_at', { ascending: false });
                 
                 if (ordersError) throw ordersError;
-                orders = ordersData;
+                orders = ordersData || [];
+                console.log("Pedidos cargados:", orders.length);
                 renderOrders();
+            } catch (err) {
+                console.error("Error cargando pedidos:", err);
+            }
 
-                // Load Products
+            // Cargar Productos (Independiente)
+            try {
                 const { data: productsData, error: productsError } = await supabaseDB
                     .from('products')
                     .select('*');
                 
                 if (productsError) throw productsError;
-                products = productsData;
+                products = productsData || [];
+                console.log("Productos cargados:", products.length);
                 renderProducts();
-
             } catch (err) {
-                console.error("Error loading data from Supabase:", err);
-                // Fallback to local
-                orders = JSON.parse(localStorage.getItem('anilina_orders') || '[]');
+                console.error("Error cargando productos:", err);
+                // Fallback local solo si falla Supabase
                 products = JSON.parse(localStorage.getItem('anilina_products') || '[]');
-                renderOrders();
                 renderProducts();
             }
         }
