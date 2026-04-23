@@ -164,7 +164,7 @@ function displayProducts() {
     // Filter products for the main collection based on selected category
     let mainProducts = products;
     if (currentCategory !== 'all') {
-        mainProducts = products.filter(p => p.tag === currentCategory);
+        mainProducts = products.filter(p => p.category === currentCategory);
     }
     
     // Render in respective containers

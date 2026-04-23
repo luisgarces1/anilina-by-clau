@@ -460,11 +460,9 @@
                                 <input type="number" id="prod-price" required placeholder="Ej. 125000">
                             </div>
                             <div class="form-group">
-                                <label>Etiqueta / Estado</label>
-                                <select id="prod-tag">
-                                    <option value="none">General</option>
-                                    <option value="latest">Nueva Colección</option>
-                                    <option value="promo">En Promoción</option>
+                                <label>Categoría del Producto</label>
+                                <select id="prod-category">
+                                    <option value="general">General</option>
                                     <option value="bolsos">Bolsos</option>
                                     <option value="carteras">Carteras</option>
                                     <option value="relojes">Relojes</option>
@@ -474,6 +472,14 @@
                                     <option value="cadenas">Cadenas</option>
                                     <option value="dijes">Dijes</option>
                                     <option value="collares">Collares</option>
+                                </select>
+                            </div>
+                            <div class="form-group">
+                                <label>Estado Especial (Opcional)</label>
+                                <select id="prod-tag">
+                                    <option value="none">Ninguno (Normal)</option>
+                                    <option value="latest">Nueva Colección</option>
+                                    <option value="promo">En Promoción</option>
                                 </select>
                             </div>
                             <div class="form-group">
@@ -725,27 +731,23 @@
             }
 
             body.innerHTML = products.map(p => {
-                let tagLabel = 'General';
-                let tagClass = 'badge-general';
-                
-                if (p.tag === 'latest') { tagLabel = 'Nuevo'; tagClass = 'badge-new'; }
-                else if (p.promo) { tagLabel = 'Promo'; tagClass = 'badge-promo'; }
-                else if (p.tag === 'bolsos') { tagLabel = 'Bolso'; tagClass = 'badge-bolsos'; }
-                else if (p.tag === 'carteras') { tagLabel = 'Cartera'; tagClass = 'badge-carteras'; }
-                else if (p.tag === 'relojes') { tagLabel = 'Reloj'; tagClass = 'badge-relojes'; }
-                else if (p.tag === 'aretes') { tagLabel = 'Aretes'; tagClass = 'badge-aretes'; }
-                else if (p.tag === 'sets') { tagLabel = 'Set'; tagClass = 'badge-sets'; }
-                else if (p.tag === 'anillos') { tagLabel = 'Anillo'; tagClass = 'badge-anillos'; }
-                else if (p.tag === 'cadenas') { tagLabel = 'Cadena'; tagClass = 'badge-cadenas'; }
-                else if (p.tag === 'dijes') { tagLabel = 'Dije'; tagClass = 'badge-dijes'; }
-                else if (p.tag === 'collares') { tagLabel = 'Collar'; tagClass = 'badge-collares'; }
+                let statusLabel = '';
+                let statusClass = '';
+                if (p.tag === 'latest') { statusLabel = 'Nuevo'; statusClass = 'badge-new'; }
+                else if (p.promo) { statusLabel = 'Promo'; statusClass = 'badge-promo'; }
+
+                let catLabel = p.category ? p.category.charAt(0).toUpperCase() + p.category.slice(1) : 'General';
+                let catClass = `badge-${p.category || 'general'}`;
 
                 return `
                     <tr>
                         <td class="product-img-td"><img src="${p.image}" onerror="this.src='https://via.placeholder.com/40'"></td>
                         <td><strong>${p.name}</strong></td>
                         <td>$${p.price.toLocaleString()}</td>
-                        <td><span class="badge ${tagClass}">${tagLabel}</span></td>
+                        <td>
+                            ${statusLabel ? `<span class="badge ${statusClass}">${statusLabel}</span>` : ''}
+                            <span class="badge ${catClass}">${catLabel}</span>
+                        </td>
                         <td>
                             <div style="display: flex; gap: 5px;">
                                 <button class="btn btn-outline" style="padding: 5px 10px;" onclick="editProduct(${p.id})" title="Editar">
@@ -839,11 +841,13 @@
 
             if (!image) { alert('Por favor añade una imagen.'); return; }
 
+            const category = document.getElementById('prod-category').value;
             const productData = {
                 name,
                 price,
                 image,
-                tag: (tag === 'latest' || tag === 'conjuntos' || tag === 'carteras' || tag === 'bolsos') ? tag : null,
+                category,
+                tag: tag === 'latest' ? 'latest' : null,
                 promo: tag === 'promo',
                 oldPrice: tag === 'promo' ? oldPrice : null
             };
@@ -873,7 +877,13 @@
             document.getElementById('prod-price').value = p.price;
             document.getElementById('prod-image').value = p.image;
             document.getElementById('prod-old-price').value = p.oldPrice || '';
-            let tagValue = p.tag || 'none';
+            
+            // Set Category
+            document.getElementById('prod-category').value = p.category || 'general';
+            
+            // Set Tag/Status
+            let tagValue = 'none';
+            if (p.tag === 'latest') tagValue = 'latest';
             if (p.promo) tagValue = 'promo';
             document.getElementById('prod-tag').value = tagValue;
             setProductImage(p.image);
