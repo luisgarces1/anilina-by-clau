@@ -38,7 +38,7 @@ async function loadProducts() {
     } catch (err) {
         console.error("Error loading products from Supabase:", err);
         // Fallback to local if something fails
-        products = JSON.parse(localStorage.getItem('anilina_products')) || initialProducts;
+        products = JSON.parse(localStorage.getItem('claumu_products')) || initialProducts;
         displayProducts();
     }
 }
@@ -81,7 +81,7 @@ function generateOrderRef() {
     for (let i = 0; i < 4; i++) {
         result += chars.charAt(Math.floor(Math.random() * chars.length));
     }
-    return `AN-${result}`;
+    return `CL-${result}`;
 }
 
 async function saveOrder(customerData, cartItems, total, paymentMethod) {
@@ -103,9 +103,9 @@ async function saveOrder(customerData, cartItems, total, paymentMethod) {
     } catch (err) {
         console.error("Error saving order to Supabase:", err);
         // Fallback to local so the user doesn't lose the sale
-        const orders = JSON.parse(localStorage.getItem('anilina_orders') || '[]');
+        const orders = JSON.parse(localStorage.getItem('claumu_orders') || '[]');
         orders.push({...newOrder, id: Date.now(), date: new Date().toLocaleString()});
-        localStorage.setItem('anilina_orders', JSON.stringify(orders));
+        localStorage.setItem('claumu_orders', JSON.stringify(orders));
         lastOrderData = {...newOrder, id: Date.now()};
     }
 }
@@ -360,7 +360,7 @@ function sendWhatsAppOrder() {
     const itemsText = items.map(i => `- ${i.quantity}x ${i.name}`).join('%0A');
     const methodText = paymentMethod === 'lallave' ? 'La Llave' : 'Bancolombia QR';
     
-    const message = `¡Hola Anilina! 👋 Acabo de realizar un pedido:%0A%0A` +
+    const message = `¡Hola ClauMu! 👋 Acabo de realizar un pedido:%0A%0A` +
         `🆔 *Referencia:* ${ref}%0A` +
         `👤 *Cliente:* ${customer.name}%0A` +
         `📞 *Tel:* ${customer.phone}%0A` +
@@ -370,7 +370,7 @@ function sendWhatsAppOrder() {
         `💳 *Método de Pago:* ${methodText}%0A%0A` +
         `Aquí adjunto mi comprobante de transferencia.`;
 
-    window.open(`https://wa.me/573044223573?text=${message}`, '_blank');
+    window.open(`https://wa.me/573025410404?text=${message}`, '_blank');
 }
 
 // Admin Navigation
@@ -419,8 +419,8 @@ function checkAdminPassword() {
 }
 
 function updateSettings() {
-    const qrPath = localStorage.getItem('anilina_qr_path') || 'imagenes/qr_bancolombia.png';
-    const llaveId = localStorage.getItem('anilina_llave_id') || '@CMG o 3245334564';
+    const qrPath = localStorage.getItem('claumu_qr_path') || 'imagenes/qr_bancolombia.png';
+    const llaveId = localStorage.getItem('claumu_llave_id') || '@CMG o 3245334564';
     
     const qrImg = document.getElementById('qr-image');
     const qrLink = document.querySelector('.btn-download');

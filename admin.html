@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Admin Dashboard | Anilina by Clau Accesorios</title>
+    <title>Admin Dashboard | ClauMu Accesorios</title>
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@300;400;600&family=Playfair+Display:wght@700&display=swap" rel="stylesheet">
@@ -380,7 +380,7 @@
 <body>
     <div class="admin-layout">
         <aside class="sidebar">
-            <div class="sidebar-brand">Anilina Admin</div>
+            <div class="sidebar-brand">ClauMu Admin</div>
             <div class="nav-item active" onclick="showView('orders', event)">
                 <i class="fas fa-shopping-bag"></i> Pedidos
             </div>
@@ -620,7 +620,7 @@
             } catch (err) {
                 console.error("Error cargando productos:", err);
                 // Fallback local solo si falla Supabase
-                products = JSON.parse(localStorage.getItem('anilina_products') || '[]');
+                products = JSON.parse(localStorage.getItem('claumu_products') || '[]');
                 renderProducts();
             }
         }
@@ -906,8 +906,8 @@
 
         // SETTINGS LOGIC
         function renderSettings() {
-            const qrPath = localStorage.getItem('anilina_qr_path') || 'imagenes/qr_bancolombia.png';
-            const llaveId = localStorage.getItem('anilina_llave_id') || '@CMG o 3245334564';
+            const qrPath = localStorage.getItem('claumu_qr_path') || 'imagenes/qr_bancolombia.png';
+            const llaveId = localStorage.getItem('claumu_llave_id') || '@CMG o 3245334564';
             document.getElementById('setting-qr-path').value = qrPath;
             document.getElementById('current-qr-img').src = qrPath;
             document.getElementById('setting-llave-id').value = llaveId;
@@ -916,8 +916,8 @@
         function saveSettings() {
             const path = document.getElementById('setting-qr-path').value;
             const llaveId = document.getElementById('setting-llave-id').value;
-            localStorage.setItem('anilina_qr_path', path);
-            localStorage.setItem('anilina_llave_id', llaveId);
+            localStorage.setItem('claumu_qr_path', path);
+            localStorage.setItem('claumu_llave_id', llaveId);
             alert('Configuración guardada localmente.');
         }
 
