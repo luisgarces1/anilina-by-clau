@@ -438,17 +438,6 @@ img {
     color: white;
 }
 
-.badge.set, .badge.sets {
-    background-color: #9c27b0;
-    color: white;
-}
-
-.badge.bag, .badge.bolsos, .badge.carteras {
-    background-color: #009688;
-    color: white;
-}
-
-.badge.relojes { background-color: #512da8; color: white; }
 .badge.aretes { background-color: #fbc02d; color: black; }
 .badge.anillos { background-color: #0288d1; color: white; }
 .badge.cadenas { background-color: #5d4037; color: white; }

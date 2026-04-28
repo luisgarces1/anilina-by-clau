@@ -116,11 +116,7 @@ function createProductHTML(product) {
         <div class="product-card">
             ${product.promo ? '<span class="badge sale">SALE</span>' : ''}
             ${product.tag === 'latest' ? '<span class="badge new">NUEVO</span>' : ''}
-            ${product.tag === 'bolsos' ? '<span class="badge bag">BOLSO</span>' : ''}
-            ${product.tag === 'carteras' ? '<span class="badge bag">CARTERA</span>' : ''}
-            ${product.tag === 'relojes' ? '<span class="badge relojes">RELOJ</span>' : ''}
             ${product.tag === 'aretes' ? '<span class="badge aretes">ARETES</span>' : ''}
-            ${product.tag === 'sets' ? '<span class="badge sets">SET</span>' : ''}
             ${product.tag === 'anillos' ? '<span class="badge anillos">ANILLO</span>' : ''}
             ${product.tag === 'cadenas' ? '<span class="badge cadenas">CADENA</span>' : ''}
             ${product.tag === 'collares' ? '<span class="badge collares">COLLAR</span>' : ''}
