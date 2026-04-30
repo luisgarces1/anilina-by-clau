@@ -20,27 +20,75 @@ const SUPABASE_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZ
 const supabaseDB = supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
 
 let products = [];
+let categories = [];
 
 async function loadProducts() {
     try {
         const { data, error } = await supabaseDB.from('products').select('*');
         if (error) throw error;
         
-        if (!data || data.length === 0) {
+        if (data && data.length > 0) {
+            products = data;
+        } else {
             // Seed defaults if database is empty
             const { error: insertError } = await supabaseDB.from('products').insert(initialProducts);
             if (insertError) console.error("Error seeding products:", insertError);
             products = initialProducts;
-        } else {
-            products = data;
         }
+        
+        await loadCategories();
         displayProducts();
     } catch (err) {
         console.error("Error loading products from Supabase:", err);
-        // Fallback to local if something fails
         products = JSON.parse(localStorage.getItem('claumu_products')) || initialProducts;
+        await loadCategories();
         displayProducts();
     }
+}
+
+async function loadCategories() {
+    try {
+        const { data, error } = await supabaseDB.from('categories').select('*').order('name', { ascending: true });
+        if (error) throw error;
+        
+        categories = data || [];
+        if (categories.length === 0) {
+            categories = [
+                { name: 'Otros', slug: 'otros' },
+                { name: 'Aretes', slug: 'aretes' },
+                { name: 'Anillos', slug: 'anillos' },
+                { name: 'Cadenas', slug: 'cadenas' },
+                { name: 'Dijes', slug: 'dijes' },
+                { name: 'Collares', slug: 'collares' },
+                { name: 'Pulseras', slug: 'pulseras' }
+            ];
+        }
+        renderCategoryFilters();
+    } catch (err) {
+        console.error("Error loading categories:", err);
+        categories = [
+            { name: 'Otros', slug: 'otros' },
+            { name: 'Aretes', slug: 'aretes' },
+            { name: 'Anillos', slug: 'anillos' },
+            { name: 'Cadenas', slug: 'cadenas' },
+            { name: 'Dijes', slug: 'dijes' },
+            { name: 'Collares', slug: 'collares' },
+            { name: 'Pulseras', slug: 'pulseras' }
+        ];
+        renderCategoryFilters();
+    }
+}
+
+function renderCategoryFilters() {
+    const nav = document.getElementById('category-nav');
+    if (!nav) return;
+    
+    nav.innerHTML = `
+        <button class="cat-btn ${currentCategory === 'all' ? 'active' : ''}" onclick="filterByCategory('all')">Todos</button>
+        ${categories.map(cat => `
+            <button class="cat-btn ${currentCategory === cat.slug ? 'active' : ''}" onclick="filterByCategory('${cat.slug}')">${cat.name}</button>
+        `).join('')}
+    `;
 }
 
 
@@ -121,7 +169,8 @@ function createProductHTML(product) {
             ${product.tag === 'cadenas' ? '<span class="badge cadenas">CADENA</span>' : ''}
             ${product.tag === 'collares' ? '<span class="badge collares">COLLAR</span>' : ''}
             ${product.tag === 'dijes' ? '<span class="badge dijes">DIJE</span>' : ''}
-            ${product.category === 'pulseras' ? '<span class="badge pulseras">PULSERA</span>' : ''}
+            ${(product.category === 'otros' || !product.category || product.category === 'general' || !categories.find(c => c.slug === product.category)) && product.tag !== 'latest' && !product.promo ? '<span class="badge otros">OTROS</span>' : ''}
+            ${product.category && product.category !== 'otros' && product.category !== 'general' && categories.find(c => c.slug === product.category) && product.tag !== 'latest' && !product.promo ? `<span class="badge ${product.category}">${product.category.toUpperCase()}</span>` : ''}
             <div class="product-img">
                 <img src="${product.image}" alt="${product.name}">
             </div>
@@ -161,7 +210,12 @@ function displayProducts() {
     // Filter products for the main collection based on selected category
     let mainProducts = products;
     if (currentCategory !== 'all') {
-        mainProducts = products.filter(p => p.category === currentCategory);
+        mainProducts = products.filter(p => {
+            if (currentCategory === 'otros') {
+                return !p.category || p.category === 'otros' || p.category === 'general' || !categories.find(c => c.slug === p.category);
+            }
+            return p.category === currentCategory;
+        });
     }
     
     // Render in respective containers

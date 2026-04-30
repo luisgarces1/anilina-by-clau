@@ -385,6 +385,9 @@
             <div class="nav-item" onclick="showView('products', event)">
                 <i class="fas fa-gem"></i> Productos
             </div>
+            <div class="nav-item" onclick="showView('categories', event)">
+                <i class="fas fa-tags"></i> Categorías
+            </div>
             <div class="nav-item" onclick="showView('settings', event)">
                 <i class="fas fa-cog"></i> Configuración
             </div>
@@ -460,7 +463,7 @@
                             <div class="form-group">
                                 <label>Categoría del Producto</label>
                                 <select id="prod-category">
-                                    <option value="general">General</option>
+                                    <option value="otros">Otros (Sin categoría)</option>
                                     <option value="aretes">Aretes</option>
                                     <option value="anillos">Anillos</option>
                                     <option value="cadenas">Cadenas</option>
@@ -477,7 +480,7 @@
                                     <option value="promo">En Promoción</option>
                                 </select>
                             </div>
-                            <div class="form-group">
+                            <div class="form-group" id="old-price-container" style="display: none;">
                                 <label>Precio Anterior (Solo para promos)</label>
                                 <input type="number" id="prod-old-price" placeholder="Ej. 150000">
                             </div>
@@ -518,6 +521,51 @@
                         </thead>
                         <tbody id="products-body">
                             <!-- Products injected here -->
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+
+            <!-- VIEW: CATEGORIES -->
+            <div id="view-categories" class="view-section">
+                <div class="header">
+                    <h1>🏷️ Gestión de Categorías</h1>
+                    <button class="btn btn-primary" onclick="toggleCategoryForm()"><i class="fas fa-plus"></i> Nueva Categoría</button>
+                </div>
+
+                <!-- Category Form -->
+                <div id="category-form-container" class="form-card" style="display: none;">
+                    <h2 id="cat-form-title">Agregar Nueva Categoría</h2>
+                    <form id="category-form">
+                        <input type="hidden" id="cat-edit-id">
+                        <div class="form-grid">
+                            <div class="form-group">
+                                <label>Nombre de la Categoría</label>
+                                <input type="text" id="cat-name" required placeholder="Ej. Pulseras">
+                            </div>
+                            <div class="form-group">
+                                <label>Slug (Identificador único)</label>
+                                <input type="text" id="cat-slug" required placeholder="Ej. pulseras">
+                            </div>
+                        </div>
+                        <div style="display: flex; gap: 10px;">
+                            <button type="submit" class="btn btn-success">Guardar Categoría</button>
+                            <button type="button" class="btn btn-outline" onclick="toggleCategoryForm()">Cancelar</button>
+                        </div>
+                    </form>
+                </div>
+
+                <div class="table-container">
+                    <table>
+                        <thead>
+                            <tr>
+                                <th>Nombre</th>
+                                <th>Slug</th>
+                                <th>Acciones</th>
+                            </tr>
+                        </thead>
+                        <tbody id="categories-body">
+                            <!-- Categories injected here -->
                         </tbody>
                     </table>
                 </div>
@@ -579,6 +627,7 @@
         // Data Management
         let products = [];
         let orders = [];
+        let categories = [];
 
         async function init() {
             console.log("Iniciando conexión con Supabase...");
@@ -617,6 +666,45 @@
                 // Fallback local solo si falla Supabase
                 products = JSON.parse(localStorage.getItem('claumu_products') || '[]');
                 renderProducts();
+            }
+            // Cargar Categorías (Nuevo)
+            try {
+                const { data: catData, error: catError } = await supabaseDB
+                    .from('categories')
+                    .select('*')
+                    .order('name', { ascending: true });
+                
+                if (catError) throw catError;
+                categories = catData || [];
+                
+                if (categories.length === 0) {
+                    // Si no hay categorías en DB, usar las por defecto
+                    categories = [
+                        { name: 'Otros', slug: 'otros' },
+                        { name: 'Aretes', slug: 'aretes' },
+                        { name: 'Anillos', slug: 'anillos' },
+                        { name: 'Cadenas', slug: 'cadenas' },
+                        { name: 'Dijes', slug: 'dijes' },
+                        { name: 'Collares', slug: 'collares' },
+                        { name: 'Pulseras', slug: 'pulseras' }
+                    ];
+                }
+                console.log("Categorías cargadas:", categories.length);
+                renderCategories();
+                updateProductCategorySelect();
+            } catch (err) {
+                console.error("Error cargando categorías:", err);
+                categories = [
+                    { name: 'Otros', slug: 'otros' },
+                    { name: 'Aretes', slug: 'aretes' },
+                    { name: 'Anillos', slug: 'anillos' },
+                    { name: 'Cadenas', slug: 'cadenas' },
+                    { name: 'Dijes', slug: 'dijes' },
+                    { name: 'Collares', slug: 'collares' },
+                    { name: 'Pulseras', slug: 'pulseras' }
+                ];
+                renderCategories();
+                updateProductCategorySelect();
             }
         }
 
@@ -731,8 +819,8 @@
                 if (p.tag === 'latest') { statusLabel = 'Nuevo'; statusClass = 'badge-new'; }
                 else if (p.promo) { statusLabel = 'Promo'; statusClass = 'badge-promo'; }
 
-                let catLabel = p.category ? p.category.charAt(0).toUpperCase() + p.category.slice(1) : 'General';
-                let catClass = `badge-${p.category || 'general'}`;
+                let catLabel = p.category ? (p.category === 'otros' || p.category === 'general' ? 'Otros' : p.category.charAt(0).toUpperCase() + p.category.slice(1)) : 'Otros';
+                let catClass = `badge-${p.category === 'general' ? 'otros' : (p.category || 'otros')}`;
 
                 return `
                     <tr>
@@ -766,9 +854,20 @@
                 document.getElementById('product-form').reset();
                 document.getElementById('edit-id').value = '';
                 document.getElementById('form-title').innerText = "Agregar Nuevo Producto";
+                document.getElementById('old-price-container').style.display = 'none';
                 clearProductImage();
             }
         }
+
+        // Conditional visibility for Old Price
+        document.getElementById('prod-tag').addEventListener('change', function() {
+            const oldPriceContainer = document.getElementById('old-price-container');
+            if (this.value === 'promo') {
+                oldPriceContainer.style.display = 'block';
+            } else {
+                oldPriceContainer.style.display = 'none';
+            }
+        });
 
         // Image Handling Logic (Keep as is, but used by save)
         const dropZone = document.getElementById('image-drop-zone');
@@ -874,12 +973,17 @@
             document.getElementById('prod-old-price').value = p.oldPrice || '';
             
             // Set Category
-            document.getElementById('prod-category').value = p.category || 'general';
+            document.getElementById('prod-category').value = p.category || 'otros';
             
             // Set Tag/Status
             let tagValue = 'none';
             if (p.tag === 'latest') tagValue = 'latest';
-            if (p.promo) tagValue = 'promo';
+            if (p.promo) {
+                tagValue = 'promo';
+                document.getElementById('old-price-container').style.display = 'block';
+            } else {
+                document.getElementById('old-price-container').style.display = 'none';
+            }
             document.getElementById('prod-tag').value = tagValue;
             setProductImage(p.image);
             document.getElementById('form-title').innerText = "Editar Producto";
@@ -897,6 +1001,112 @@
                     console.error("Delete error:", err);
                 }
             }
+        }
+
+        // CATEGORIES LOGIC
+        function renderCategories() {
+            const body = document.getElementById('categories-body');
+            if (categories.length === 0) {
+                body.innerHTML = '<tr><td colspan="3" style="text-align: center; padding: 40px; color: #999;">No hay categorías.</td></tr>';
+                return;
+            }
+
+            body.innerHTML = categories.map(cat => `
+                <tr>
+                    <td><strong>${cat.name}</strong></td>
+                    <td><code>${cat.slug}</code></td>
+                    <td>
+                        <div style="display: flex; gap: 5px;">
+                            <button class="btn btn-outline" style="padding: 5px 10px;" onclick="editCategory(${cat.id})" title="Editar" ${!cat.id ? 'disabled' : ''}>
+                                <i class="fas fa-edit"></i>
+                            </button>
+                            <button class="btn btn-danger" style="padding: 5px 10px;" onclick="deleteCategory(${cat.id})" title="Eliminar" ${!cat.id ? 'disabled' : ''}>
+                                <i class="fas fa-trash"></i>
+                            </button>
+                        </div>
+                    </td>
+                </tr>
+            `).join('');
+        }
+
+        function toggleCategoryForm() {
+            const container = document.getElementById('category-form-container');
+            const isVisible = container.style.display === 'block';
+            container.style.display = isVisible ? 'none' : 'block';
+            if (!isVisible) {
+                document.getElementById('category-form').reset();
+                document.getElementById('cat-edit-id').value = '';
+                document.getElementById('cat-form-title').innerText = "Agregar Nueva Categoría";
+            }
+        }
+
+        document.getElementById('cat-name').addEventListener('input', function() {
+            const slugInput = document.getElementById('cat-slug');
+            if (document.getElementById('cat-edit-id').value === '') {
+                slugInput.value = this.value.toLowerCase()
+                    .normalize("NFD").replace(/[\u0300-\u036f]/g, "")
+                    .replace(/[^a-z0-9]/g, '-')
+                    .replace(/-+/g, '-')
+                    .replace(/^-|-$/g, '');
+            }
+        });
+
+        document.getElementById('category-form').addEventListener('submit', async (e) => {
+            e.preventDefault();
+            const id = document.getElementById('cat-edit-id').value;
+            const name = document.getElementById('cat-name').value;
+            const slug = document.getElementById('cat-slug').value;
+
+            const catData = { name, slug };
+
+            try {
+                if (id) {
+                    const { error } = await supabaseDB.from('categories').update(catData).eq('id', id);
+                    if (error) throw error;
+                } else {
+                    const { error } = await supabaseDB.from('categories').insert([catData]);
+                    if (error) throw error;
+                }
+                await loadData();
+                toggleCategoryForm();
+                alert('¡Categoría guardada!');
+            } catch (err) {
+                console.error("Category save error:", err);
+                alert('Error al guardar la categoría. Asegúrate de que la tabla "categories" exista en Supabase.');
+            }
+        });
+
+        function editCategory(id) {
+            const cat = categories.find(c => c.id === id);
+            if (!cat) return;
+            document.getElementById('cat-edit-id').value = cat.id;
+            document.getElementById('cat-name').value = cat.name;
+            document.getElementById('cat-slug').value = cat.slug;
+            document.getElementById('cat-form-title').innerText = "Editar Categoría";
+            document.getElementById('category-form-container').style.display = 'block';
+        }
+
+        async function deleteCategory(id) {
+            if (confirm('¿Eliminar esta categoría? Esto no afectará a los productos ya existentes, pero se quedarán sin categoría asignada.')) {
+                try {
+                    const { error } = await supabaseDB.from('categories').delete().eq('id', id);
+                    if (error) throw error;
+                    await loadData();
+                } catch (err) {
+                    console.error("Category delete error:", err);
+                }
+            }
+        }
+
+        function updateProductCategorySelect() {
+            const select = document.getElementById('prod-category');
+            const currentValue = select.value;
+            
+            select.innerHTML = categories.map(cat => `
+                <option value="${cat.slug}">${cat.name}</option>
+            `).join('');
+            
+            if (currentValue) select.value = currentValue;
         }
 
         // SETTINGS LOGIC

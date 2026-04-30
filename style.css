@@ -443,6 +443,7 @@ img {
 .badge.cadenas { background-color: #5d4037; color: white; }
 .badge.collares, .badge.dijes { background-color: #e65100; color: white; }
 .badge.pulseras { background-color: #d81b60; color: white; }
+.badge.otros { background-color: #f0f0f0; color: #777; }
 
 /* Price Styles */
 .price-container {
