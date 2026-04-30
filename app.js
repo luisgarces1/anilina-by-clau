@@ -121,6 +121,7 @@ function createProductHTML(product) {
             ${product.tag === 'cadenas' ? '<span class="badge cadenas">CADENA</span>' : ''}
             ${product.tag === 'collares' ? '<span class="badge collares">COLLAR</span>' : ''}
             ${product.tag === 'dijes' ? '<span class="badge dijes">DIJE</span>' : ''}
+            ${product.category === 'pulseras' ? '<span class="badge pulseras">PULSERA</span>' : ''}
             <div class="product-img">
                 <img src="${product.image}" alt="${product.name}">
             </div>

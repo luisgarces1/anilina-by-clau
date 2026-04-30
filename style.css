@@ -442,6 +442,7 @@ img {
 .badge.anillos { background-color: #0288d1; color: white; }
 .badge.cadenas { background-color: #5d4037; color: white; }
 .badge.collares, .badge.dijes { background-color: #e65100; color: white; }
+.badge.pulseras { background-color: #d81b60; color: white; }
 
 /* Price Styles */
 .price-container {
